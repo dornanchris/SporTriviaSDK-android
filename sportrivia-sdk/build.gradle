@@ -45,15 +45,17 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
 }
 
-// JitPack publishing configuration
+// JitPack publishing configuration.
+// Group and version flow from JitPack's `-Pgroup` / `-Pversion` flags, which
+// it derives from the git tag. Local builds fall back to the defaults below.
 afterEvaluate {
     publishing {
         publications {
             release(MavenPublication) {
                 from components.release
-                groupId = 'com.github.dornanchris'
+                groupId = project.findProperty('group') ?: 'com.github.dornanchris'
                 artifactId = 'SporTriviaSDK-android'
-                version = '1.0.0'
+                version = project.findProperty('version') ?: '1.0.0'
             }
         }
     }
