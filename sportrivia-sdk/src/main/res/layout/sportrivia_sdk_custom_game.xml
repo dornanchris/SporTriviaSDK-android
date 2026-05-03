@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/sportrivia_sdk_background"
+    android:padding="16dp">
+
+    <!-- Question text (shown for custom questions) -->
+    <TextView
+        android:id="@+id/sportrivia_sdk_text_question"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@color/sportrivia_sdk_text"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:padding="16dp"
+        android:visibility="gone"
+        android:layout_marginTop="20dp" />
+
+    <!-- Team image (shown when no custom question) -->
+    <ImageView
+        android:id="@+id/sportrivia_sdk_image_team1"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@id/sportrivia_sdk_text_question"
+        android:layout_marginTop="16dp"
+        android:scaleType="fitCenter" />
+
+    <!-- Score display -->
+    <LinearLayout
+        android:id="@+id/sportrivia_sdk_score_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/sportrivia_sdk_image_team1"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_marginTop="16dp">
+
+        <TextView
+            android:id="@+id/sportrivia_sdk_text_correct"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Correct: 0"
+            android:textColor="@color/sportrivia_sdk_correct"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_marginEnd="24dp" />
+
+        <TextView
+            android:id="@+id/sportrivia_sdk_text_players_left"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Players Left: 0"
+            android:textColor="@color/sportrivia_sdk_text"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <!-- Player input -->
+    <AutoCompleteTextView
+        android:id="@+id/sportrivia_sdk_auto_complete"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/sportrivia_sdk_score_layout"
+        android:layout_marginTop="20dp"
+        android:hint="@string/sportrivia_sdk_enter_player"
+        android:padding="16dp"
+        android:background="@color/sportrivia_sdk_input_bg"
+        android:completionThreshold="1"
+        android:inputType="textPersonName" />
+
+    <!-- Submit button -->
+    <Button
+        android:id="@+id/sportrivia_sdk_btn_submit"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/sportrivia_sdk_auto_complete"
+        android:layout_marginTop="12dp"
+        android:text="@string/sportrivia_sdk_submit"
+        android:backgroundTint="@color/sportrivia_sdk_primary"
+        android:textColor="@color/sportrivia_sdk_text"
+        android:enabled="false" />
+
+    <!-- Give up button -->
+    <Button
+        android:id="@+id/sportrivia_sdk_btn_give_up"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/sportrivia_sdk_btn_submit"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="8dp"
+        android:text="@string/sportrivia_sdk_give_up"
+        style="?android:attr/borderlessButtonStyle"
+        android:textColor="@color/sportrivia_sdk_incorrect" />
+
+    <!-- Checkmark feedback (hidden by default) -->
+    <ImageView
+        android:id="@+id/sportrivia_sdk_image_check"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_centerInParent="true"
+        android:src="@android:drawable/checkbox_on_background"
+        android:visibility="gone" />
+
+    <!-- X feedback (hidden by default) -->
+    <ImageView
+        android:id="@+id/sportrivia_sdk_image_x"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_centerInParent="true"
+        android:src="@android:drawable/ic_delete"
+        android:visibility="gone" />
+</RelativeLayout>

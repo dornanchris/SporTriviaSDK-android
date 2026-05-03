@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="sportrivia_sdk_app_name">SporTrivia</string>
+    <string name="sportrivia_sdk_player_info">Player Information</string>
+    <string name="sportrivia_sdk_first_name">First Name</string>
+    <string name="sportrivia_sdk_last_name">Last Name</string>
+    <string name="sportrivia_sdk_email">Email</string>
+    <string name="sportrivia_sdk_phone">Phone Number</string>
+    <string name="sportrivia_sdk_save_info">Save my info</string>
+    <string name="sportrivia_sdk_submit">Submit</string>
+    <string name="sportrivia_sdk_cancel">Cancel</string>
+    <string name="sportrivia_sdk_enter_player">Enter player name</string>
+    <string name="sportrivia_sdk_give_up">Give Up</string>
+    <string name="sportrivia_sdk_game_over">GAME OVER!</string>
+    <string name="sportrivia_sdk_share">Share Score</string>
+    <string name="sportrivia_sdk_see_answers">See Answers</string>
+    <string name="sportrivia_sdk_done">Done</string>
+    <string name="sportrivia_sdk_answers_title">Trivia Answers</string>
+    <string name="sportrivia_sdk_back">Back</string>
+</resources>

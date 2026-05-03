@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="SportriviaSDKTheme" parent="Theme.AppCompat.DayNight.NoActionBar">
+        <item name="colorPrimary">#1A1A4D</item>
+        <item name="colorPrimaryDark">#0D0D26</item>
+        <item name="colorAccent">#FFEB3B</item>
+        <item name="android:windowBackground">#1A1A33</item>
+    </style>
+</resources>
