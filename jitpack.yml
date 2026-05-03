@@ -1,0 +1,4 @@
+jdk:
+  - openjdk17
+before_install:
+  - gradle wrapper --gradle-version 8.10.2 --distribution-type bin

@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/sportrivia_sdk_background"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="24dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/sportrivia_sdk_game_over"
+        android:textColor="@color/sportrivia_sdk_incorrect"
+        android:textSize="32sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="24dp" />
+
+    <TextView
+        android:id="@+id/sportrivia_sdk_text_streak"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/sportrivia_sdk_text"
+        android:textSize="24sp"
+        android:layout_marginBottom="16dp" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="8dp">
+
+        <TextView
+            android:id="@+id/sportrivia_sdk_text_correct"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/sportrivia_sdk_correct"
+            android:textSize="16sp"
+            android:layout_marginEnd="24dp" />
+
+        <TextView
+            android:id="@+id/sportrivia_sdk_text_incorrect"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/sportrivia_sdk_incorrect"
+            android:textSize="16sp" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/sportrivia_sdk_text_max_streak"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/sportrivia_sdk_text"
+        android:textSize="14sp"
+        android:layout_marginBottom="24dp" />
+
+    <Button
+        android:id="@+id/sportrivia_sdk_btn_share"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:text="@string/sportrivia_sdk_share"
+        android:backgroundTint="@color/sportrivia_sdk_correct"
+        android:textColor="@color/sportrivia_sdk_text"
+        android:layout_marginBottom="12dp" />
+
+    <Button
+        android:id="@+id/sportrivia_sdk_btn_answers"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:text="@string/sportrivia_sdk_see_answers"
+        android:backgroundTint="@color/sportrivia_sdk_primary"
+        android:textColor="@color/sportrivia_sdk_text"
+        android:layout_marginBottom="12dp" />
+
+    <Button
+        android:id="@+id/sportrivia_sdk_btn_done"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:text="@string/sportrivia_sdk_done"
+        android:backgroundTint="@color/sportrivia_sdk_primary"
+        android:textColor="@color/sportrivia_sdk_text" />
+</LinearLayout>
