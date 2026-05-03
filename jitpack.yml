@@ -1,4 +1,10 @@
 jdk:
   - openjdk17
 before_install:
+  # JitPack's default image ships Gradle 4.8.1, which cannot run on JDK 17.
+  # Install a modern Gradle via sdkman and make it the default so the
+  # subsequent `gradle wrapper` and `gradle publishToMavenLocal` invocations
+  # both pick it up.
+  - yes | sdk install gradle 8.10.2
+  - sdk default gradle 8.10.2
   - gradle wrapper --gradle-version 8.10.2 --distribution-type bin
