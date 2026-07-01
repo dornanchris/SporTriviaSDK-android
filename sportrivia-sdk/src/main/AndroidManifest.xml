@@ -24,5 +24,22 @@
             android:exported="false"
             android:screenOrientation="portrait"
             android:theme="@style/SportriviaSDKTheme" />
+
+        <!-- Catches SporTrivia deep links (sportrivia-<partnerId>://game?...).
+             The scheme is supplied by the partner app via the
+             `sporTriviaScheme` manifest placeholder. -->
+        <activity
+            android:name="com.sportrivia.sdk.internal.ui.SporTriviaDeepLinkActivity"
+            android:exported="true"
+            android:launchMode="singleTask"
+            android:noHistory="true"
+            android:theme="@android:style/Theme.NoDisplay">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="${sporTriviaScheme}" android:host="game" />
+            </intent-filter>
+        </activity>
     </application>
 </manifest>

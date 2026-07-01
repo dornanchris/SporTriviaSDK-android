@@ -46,7 +46,30 @@ SporTriviaSDK.configure(
 SporTriviaSDK.launchCustomGame(context, "NYI_Top5A", Sport.NHL, myDelegate);
 ```
 
-See the partner setup guide in the iOS repo: <https://github.com/dornanchris/SporTriviaSDK/blob/main/PARTNER_SETUP.md> — it covers credentials, IAM scoping, and the full integration flow on both platforms.
+## Deep linking
+
+Games shared from the SporTrivia portal open your app via the `sportrivia-<partnerId>`
+URL scheme. Declare the scheme with a manifest placeholder and set your partner id:
+
+```groovy
+// app/build.gradle
+android { defaultConfig { manifestPlaceholders = [sporTriviaScheme: "sportrivia-islanders"] } }
+```
+
+```java
+SporTriviaSDK.configure(
+    new SporTriviaConfiguration.Builder(creds)
+        .partnerId("islanders")
+        .redirectBaseUrl("https://sportrivia-app.com")
+        .defaultDelegate(myDelegate)
+        .build()
+);
+```
+
+The bundled `SporTriviaDeepLinkActivity` catches the link and launches the game
+automatically — no extra code required.
+
+See the partner setup guide in the iOS repo: <https://github.com/dornanchris/SporTriviaSDK/blob/main/PARTNER_SETUP.md> — it covers credentials, IAM scoping, deep-link setup, and the full integration flow on both platforms.
 
 ## License
 

@@ -11,6 +11,12 @@ android {
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
+
+        // Default deep-link scheme placeholder so the library manifest merges
+        // cleanly even for partners who don't use deep links. Partners that do
+        // override this in their app's build.gradle, e.g.
+        //   manifestPlaceholders = [sporTriviaScheme: "sportrivia-<partnerId>"]
+        manifestPlaceholders = [sporTriviaScheme: "sportrivia-unconfigured"]
     }
 
     buildTypes {
