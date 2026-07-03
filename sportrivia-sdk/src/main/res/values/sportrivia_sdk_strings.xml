@@ -8,6 +8,7 @@
     <string name="sportrivia_sdk_phone">Phone Number</string>
     <string name="sportrivia_sdk_save_info">Save my info</string>
     <string name="sportrivia_sdk_over18">I am over 18</string>
+    <string name="sportrivia_sdk_sponsored_by">Sponsored by: %1$s</string>
     <string name="sportrivia_sdk_loading_form">Loading&#8230;</string>
     <string name="sportrivia_sdk_submit">Submit</string>
     <string name="sportrivia_sdk_cancel">Cancel</string>

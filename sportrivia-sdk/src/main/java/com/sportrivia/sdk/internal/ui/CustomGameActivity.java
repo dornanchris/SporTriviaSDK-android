@@ -66,6 +66,10 @@ public class CustomGameActivity extends AppCompatActivity {
 
         setupQuestion();
         setupTeamImage();
+        SponsorBanner.bind(this,
+                findViewById(R.id.sportrivia_sdk_sponsor_banner),
+                findViewById(R.id.sportrivia_sdk_text_sponsor),
+                engine);
         updateScoreDisplay();
         setupAutoComplete();
 

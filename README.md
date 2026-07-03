@@ -46,6 +46,10 @@ SporTriviaSDK.configure(
 SporTriviaSDK.launchCustomGame(context, "NYI_Top5A", Sport.NHL, myDelegate);
 ```
 
+## Sponsorships
+
+Questions can carry a sponsorship chosen in the SporTrivia portal. The answer key JSON embeds a `sponsorship` object (brand, click-through URL, banner S3 key); the SDK downloads the banner and shows it as a tappable strip on the game and game-over screens automatically. No sponsorship on the question — no banner. Requires `sponsorships/*` read access in your partner IAM policy.
+
 ## Fan data capture
 
 The player-info screen is built dynamically from the question's **Data Capture** configuration in the SporTrivia portal (`collect_fields` in the answer key JSON) — standard name/email/phone fields, an over-18 checkbox, and custom questions with required flags. Collected answers upload with the game results (`custom_field_answers`) and are exposed on `SporTriviaGameResult` via `isOver18()` / `getCustomFieldAnswers()`. Questions that collect nothing skip the screen; legacy answer keys show the original name/email/phone form. Nothing to configure in your app.

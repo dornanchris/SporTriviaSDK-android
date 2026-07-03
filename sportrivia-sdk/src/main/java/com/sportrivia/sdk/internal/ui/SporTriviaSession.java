@@ -12,6 +12,7 @@ import com.sportrivia.sdk.public_api.SporTriviaSDK;
 class SporTriviaSession {
     private static GameEngine gameEngine;
     private static byte[] teamImageBytes;
+    private static byte[] sponsorBannerBytes;
 
     static GameEngine getOrCreateEngine() {
         if (gameEngine == null) {
@@ -35,8 +36,17 @@ class SporTriviaSession {
         return teamImageBytes;
     }
 
+    static void setSponsorBannerBytes(byte[] bytes) {
+        sponsorBannerBytes = bytes;
+    }
+
+    static byte[] getSponsorBannerBytes() {
+        return sponsorBannerBytes;
+    }
+
     static void clear() {
         gameEngine = null;
         teamImageBytes = null;
+        sponsorBannerBytes = null;
     }
 }

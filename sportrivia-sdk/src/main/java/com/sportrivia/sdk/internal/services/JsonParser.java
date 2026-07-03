@@ -2,6 +2,7 @@ package com.sportrivia.sdk.internal.services;
 
 import com.sportrivia.sdk.internal.models.CollectFields;
 import com.sportrivia.sdk.internal.models.PlayerInfo;
+import com.sportrivia.sdk.internal.models.Sponsorship;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -40,6 +41,13 @@ public class JsonParser {
         JSONObject collectFieldsJson = json.optJSONObject("collect_fields");
         if (collectFieldsJson != null) {
             result.put("collect_fields", CollectFields.fromJson(collectFieldsJson));
+        }
+
+        // Per-question sponsorship chosen in the portal; absent when the
+        // question has no sponsor.
+        Sponsorship sponsorship = Sponsorship.fromJson(json.optJSONObject("sponsorship"));
+        if (sponsorship != null) {
+            result.put("sponsorship", sponsorship);
         }
         return result;
     }

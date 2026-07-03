@@ -104,6 +104,13 @@ public class UserInfoActivity extends AppCompatActivity {
                     // Non-fatal: team image is optional
                 }
 
+                try {
+                    byte[] bannerBytes = engine.downloadSponsorshipBanner();
+                    SporTriviaSession.setSponsorBannerBytes(bannerBytes);
+                } catch (Exception e) {
+                    // Non-fatal: the game runs without the sponsor banner
+                }
+
                 dataLoaded = true;
                 runOnUiThread(() -> configureForm(engine));
             } catch (Exception e) {

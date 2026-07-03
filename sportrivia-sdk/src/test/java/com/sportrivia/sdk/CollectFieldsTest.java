@@ -1,6 +1,7 @@
 package com.sportrivia.sdk;
 
 import com.sportrivia.sdk.internal.models.CollectFields;
+import com.sportrivia.sdk.internal.models.Sponsorship;
 import com.sportrivia.sdk.internal.models.PlayerInfo;
 import com.sportrivia.sdk.internal.services.JsonParser;
 
@@ -64,6 +65,32 @@ public class CollectFieldsTest {
     public void testNothingToCollect() {
         CollectFields fields = CollectFields.fromJson(new JSONObject());
         assertFalse(fields.hasAnythingToCollect());
+    }
+
+    @Test
+    public void testParseAnswerKeyWithSponsorship() throws Exception {
+        String json = "{\"combo\":\"NYI_Top5A\",\"type\":2,\"player_id\":[\"p1\"],"
+                + "\"sponsorship\":{\"id\":\"abc\",\"brand\":\"Acme Sports Bar\","
+                + "\"url\":\"https://example.com/promo\","
+                + "\"asset_key\":\"sponsorships/islanders/abc/banner.png\","
+                + "\"content_type\":\"image/png\",\"width\":1200,\"height\":200}}";
+
+        Map<String, Object> result = JsonParser.parseAnswerKey(json.getBytes("UTF-8"));
+        Sponsorship sponsorship = (Sponsorship) result.get("sponsorship");
+
+        assertNotNull(sponsorship);
+        assertEquals("Acme Sports Bar", sponsorship.brand);
+        assertEquals("https://example.com/promo", sponsorship.url);
+        assertEquals("sponsorships/islanders/abc/banner.png", sponsorship.assetKey);
+    }
+
+    @Test
+    public void testAnswerKeyWithoutSponsorship() throws Exception {
+        String json = "{\"combo\":\"X_Y\",\"type\":2,\"player_id\":[\"p1\"]}";
+
+        Map<String, Object> result = JsonParser.parseAnswerKey(json.getBytes("UTF-8"));
+
+        assertNull(result.get("sponsorship"));
     }
 
     @Test

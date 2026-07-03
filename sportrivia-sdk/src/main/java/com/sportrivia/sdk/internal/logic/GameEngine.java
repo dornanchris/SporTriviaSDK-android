@@ -3,6 +3,7 @@ package com.sportrivia.sdk.internal.logic;
 import com.sportrivia.sdk.internal.data.TeamAbbreviations;
 import com.sportrivia.sdk.internal.models.CollectFields;
 import com.sportrivia.sdk.internal.models.PlayerInfo;
+import com.sportrivia.sdk.internal.models.Sponsorship;
 import com.sportrivia.sdk.internal.services.JsonParser;
 import com.sportrivia.sdk.internal.services.S3DataService;
 import com.sportrivia.sdk.public_api.Sport;
@@ -47,6 +48,7 @@ public class GameEngine {
     private boolean over18 = false;
     private Map<String, String> customFieldAnswers = new HashMap<>();
     private CollectFields collectFields = CollectFields.legacyDefault();
+    private Sponsorship sponsorship;
 
     public GameEngine(S3DataService s3Service) {
         this.s3Service = s3Service;
@@ -70,6 +72,8 @@ public class GameEngine {
         collectFields = rawCollectFields instanceof CollectFields
                 ? (CollectFields) rawCollectFields
                 : CollectFields.legacyDefault();
+        Object rawSponsorship = answerKey.get("sponsorship");
+        sponsorship = rawSponsorship instanceof Sponsorship ? (Sponsorship) rawSponsorship : null;
         SporTriviaLogger.info("Answer key loaded: " + correctPlayerIds.size() + " correct IDs");
 
         byte[] playerData = s3Service.downloadPlayerList(sport);
@@ -94,6 +98,14 @@ public class GameEngine {
 
     public byte[] downloadTeamImage() throws Exception {
         return s3Service.downloadTeamImage(sport, teamAbbr);
+    }
+
+    /** Download the sponsorship banner image, or null when the question has no sponsor. */
+    public byte[] downloadSponsorshipBanner() throws Exception {
+        if (sponsorship == null) {
+            return null;
+        }
+        return s3Service.download(sponsorship.assetKey);
     }
 
     public void startGame() {
@@ -183,6 +195,9 @@ public class GameEngine {
 
     /** Data-capture configuration for this game (legacy default when the answer key has none). */
     public CollectFields getCollectFields() { return collectFields; }
+
+    /** Per-question sponsorship, or null when the question has no sponsor. */
+    public Sponsorship getSponsorship() { return sponsorship; }
 
     public String getGameId() { return gameId; }
     public Sport getSport() { return sport; }

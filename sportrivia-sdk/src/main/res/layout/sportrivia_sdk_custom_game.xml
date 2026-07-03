@@ -5,18 +5,38 @@
     android:background="@color/sportrivia_sdk_background"
     android:padding="16dp">
 
+    <!-- Sponsorship banner (shown when the question has a sponsor) -->
+    <ImageView
+        android:id="@+id/sportrivia_sdk_sponsor_banner"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:scaleType="fitCenter"
+        android:visibility="gone"
+        android:contentDescription="@null" />
+
+    <TextView
+        android:id="@+id/sportrivia_sdk_text_sponsor"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/sportrivia_sdk_sponsor_banner"
+        android:textColor="@color/sportrivia_sdk_text"
+        android:textSize="12sp"
+        android:gravity="center"
+        android:visibility="gone" />
+
     <!-- Question text (shown for custom questions) -->
     <TextView
         android:id="@+id/sportrivia_sdk_text_question"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_below="@id/sportrivia_sdk_text_sponsor"
         android:textColor="@color/sportrivia_sdk_text"
         android:textSize="20sp"
         android:textStyle="bold"
         android:gravity="center"
         android:padding="16dp"
         android:visibility="gone"
-        android:layout_marginTop="20dp" />
+        android:layout_marginTop="8dp" />
 
     <!-- Team image (shown when no custom question) -->
     <ImageView
