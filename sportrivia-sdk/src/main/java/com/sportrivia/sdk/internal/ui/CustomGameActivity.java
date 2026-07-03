@@ -12,15 +12,19 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.activity.OnBackPressedCallback;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.sportrivia.sdk.R;
 import com.sportrivia.sdk.internal.logic.GameEngine;
 import com.sportrivia.sdk.internal.logic.PlayerInfoService;
 import com.sportrivia.sdk.internal.models.PlayerInfo;
+import com.sportrivia.sdk.public_api.SporTriviaDelegate;
 import com.sportrivia.sdk.public_api.SporTriviaSDK;
 
 import java.util.ArrayList;
@@ -75,6 +79,38 @@ public class CustomGameActivity extends AppCompatActivity {
 
         buttonSubmit.setOnClickListener(v -> onSubmit());
         buttonGiveUp.setOnClickListener(v -> endGame());
+
+        ImageButton buttonExit = findViewById(R.id.sportrivia_sdk_btn_exit);
+        buttonExit.setOnClickListener(v -> confirmExit());
+
+        // Back mid-game asks the same "are you sure" instead of silently
+        // finishing and leaking the session/delegate.
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                confirmExit();
+            }
+        });
+    }
+
+    /** Ask before abandoning the game; on confirm, cancel out to the host app. */
+    private void confirmExit() {
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.sportrivia_sdk_exit_title)
+                .setMessage(R.string.sportrivia_sdk_exit_message)
+                .setPositiveButton(R.string.sportrivia_sdk_exit_confirm, (dialog, which) -> exitGame())
+                .setNegativeButton(R.string.sportrivia_sdk_exit_stay, null)
+                .show();
+    }
+
+    private void exitGame() {
+        SporTriviaDelegate delegate = SporTriviaSDK.getActiveDelegate();
+        if (delegate != null) {
+            delegate.onGameCancelled();
+        }
+        SporTriviaSession.clear();
+        SporTriviaSDK.clearActiveDelegate();
+        finish();
     }
 
     private void setupQuestion() {

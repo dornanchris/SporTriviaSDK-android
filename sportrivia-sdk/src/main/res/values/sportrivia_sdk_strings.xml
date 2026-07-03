@@ -20,4 +20,9 @@
     <string name="sportrivia_sdk_done">Done</string>
     <string name="sportrivia_sdk_answers_title">Trivia Answers</string>
     <string name="sportrivia_sdk_back">Back</string>
+    <string name="sportrivia_sdk_exit_game">Exit game</string>
+    <string name="sportrivia_sdk_exit_title">Leave the game?</string>
+    <string name="sportrivia_sdk_exit_message">Your progress won\'t be saved.</string>
+    <string name="sportrivia_sdk_exit_confirm">Leave</string>
+    <string name="sportrivia_sdk_exit_stay">Keep Playing</string>
 </resources>

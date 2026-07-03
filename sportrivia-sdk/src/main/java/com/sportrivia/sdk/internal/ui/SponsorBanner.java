@@ -11,6 +11,7 @@ import android.widget.TextView;
 
 import com.sportrivia.sdk.internal.logic.GameEngine;
 import com.sportrivia.sdk.internal.models.Sponsorship;
+import com.sportrivia.sdk.public_api.SporTriviaLogger;
 
 /**
  * Shows the per-question sponsorship banner (chosen in the SporTrivia
@@ -32,6 +33,9 @@ final class SponsorBanner {
         }
         Bitmap bitmap = BitmapFactory.decodeByteArray(bannerBytes, 0, bannerBytes.length);
         if (bitmap == null) {
+            SporTriviaLogger.error("Sponsorship banner for '" + sponsorship.brand
+                    + "' downloaded but could not be decoded as an image ("
+                    + bannerBytes.length + " bytes) — banner will not be shown");
             return;
         }
 

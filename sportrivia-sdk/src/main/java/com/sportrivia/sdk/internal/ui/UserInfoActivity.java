@@ -19,6 +19,7 @@ import com.sportrivia.sdk.R;
 import com.sportrivia.sdk.internal.logic.GameEngine;
 import com.sportrivia.sdk.internal.models.CollectFields;
 import com.sportrivia.sdk.public_api.Sport;
+import com.sportrivia.sdk.public_api.SporTriviaLogger;
 import com.sportrivia.sdk.public_api.SporTriviaSDK;
 
 import java.util.HashMap;
@@ -109,6 +110,9 @@ public class UserInfoActivity extends AppCompatActivity {
                     SporTriviaSession.setSponsorBannerBytes(bannerBytes);
                 } catch (Exception e) {
                     // Non-fatal: the game runs without the sponsor banner
+                    SporTriviaLogger.error("Sponsorship banner failed to download: " + e
+                            + " — banner will not be shown. If this is an access error, the SDK"
+                            + " credentials need s3:GetObject on sponsorships/* (see the README)");
                 }
 
                 dataLoaded = true;

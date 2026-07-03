@@ -5,11 +5,23 @@
     android:background="@color/sportrivia_sdk_background"
     android:padding="16dp">
 
+    <!-- Exit button (asks for confirmation) -->
+    <ImageButton
+        android:id="@+id/sportrivia_sdk_btn_exit"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:src="@android:drawable/ic_menu_close_clear_cancel"
+        android:background="@android:color/transparent"
+        android:contentDescription="@string/sportrivia_sdk_exit_game" />
+
     <!-- Sponsorship banner (shown when the question has a sponsor) -->
     <ImageView
         android:id="@+id/sportrivia_sdk_sponsor_banner"
         android:layout_width="match_parent"
         android:layout_height="48dp"
+        android:layout_below="@id/sportrivia_sdk_btn_exit"
         android:scaleType="fitCenter"
         android:visibility="gone"
         android:contentDescription="@null" />
