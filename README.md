@@ -46,6 +46,56 @@ SporTriviaSDK.configure(
 SporTriviaSDK.launchCustomGame(context, "NYI_Top5A", Sport.NHL, myDelegate);
 ```
 
+## Deep linking (QR code launch)
+
+Questions built in the SporTrivia portal with the **"Your own app"** destination produce a QR code that deep links into your app:
+
+```
+yourscheme://sportrivia/custom/<gameId>?info=<sportCode>
+```
+
+If the app isn't installed, the QR's hosted redirect page saves the game info and sends the fan to your Google Play listing instead. Save your URL scheme, package name, and store URLs on the portal's **Developer → Deep Linking & QR** tab to enable this.
+
+**Step 1.** Register the scheme in `app/src/main/AndroidManifest.xml` on the activity that should receive the launch (`android:exported="true"` is required on Android 12+):
+
+```xml
+<activity
+    android:name=".MainActivity"
+    android:exported="true"
+    android:launchMode="singleTask">
+
+    <intent-filter>
+        <action android:name="android.intent.action.VIEW" />
+        <category android:name="android.intent.category.DEFAULT" />
+        <category android:name="android.intent.category.BROWSABLE" />
+        <data android:scheme="yourscheme" android:host="sportrivia" />
+    </intent-filter>
+</activity>
+```
+
+**Step 2.** Parse the link and launch the game:
+
+```java
+@Override
+protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    handleSporTriviaLink(getIntent());
+}
+
+@Override
+protected void onNewIntent(Intent intent) {
+    super.onNewIntent(intent);
+    handleSporTriviaLink(intent);
+}
+
+private void handleSporTriviaLink(Intent intent) {
+    SporTriviaDeepLink link = SporTriviaDeepLink.parse(intent.getData());
+    if (link != null) {
+        SporTriviaSDK.launchCustomGame(this, link.getGameId(), link.getSport(), myDelegate);
+    }
+}
+```
+
 See the partner setup guide in the iOS repo: <https://github.com/dornanchris/SporTriviaSDK/blob/main/PARTNER_SETUP.md> — it covers credentials, IAM scoping, and the full integration flow on both platforms.
 
 ## License
