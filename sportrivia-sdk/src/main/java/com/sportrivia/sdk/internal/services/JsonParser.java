@@ -1,14 +1,19 @@
 package com.sportrivia.sdk.internal.services;
 
+import com.sportrivia.sdk.internal.models.CollectFields;
 import com.sportrivia.sdk.internal.models.PlayerInfo;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 
 /**
  * Parses JSON data structures used by the SDK.
@@ -29,6 +34,13 @@ public class JsonParser {
             playerIds.add(String.valueOf(val));
         }
         result.put("player_ids", playerIds);
+
+        // Data-capture config from the portal's Data Capture step; absent on
+        // answer keys written before the feature existed.
+        JSONObject collectFieldsJson = json.optJSONObject("collect_fields");
+        if (collectFieldsJson != null) {
+            result.put("collect_fields", CollectFields.fromJson(collectFieldsJson));
+        }
         return result;
     }
 
@@ -64,16 +76,57 @@ public class JsonParser {
         return new ArrayList<>(seen.values());
     }
 
+    /**
+     * Format game results as JSON for S3 upload.
+     *
+     * <p>Writes the keys the SporTrivia portal reads back for its contacts
+     * view and CSV export (name/email/phone/over_18/custom_field_answers/
+     * answers_found), plus the original firstName/lastName/phoneNumber/
+     * correctAnswers keys for older downstream consumers.
+     */
     public static byte[] formatGameResults(String firstName, String lastName, String email,
-                                            String phoneNumber, String gameId,
+                                            String phoneNumber, boolean over18,
+                                            Map<String, String> customFieldAnswers,
+                                            String gameId,
                                             List<PlayerInfo> correctPlayers) throws Exception {
         JSONObject json = new JSONObject();
-        json.put("firstName", firstName);
-        json.put("lastName", lastName);
-        json.put("email", email);
-        json.put("phoneNumber", phoneNumber);
         json.put("gameId", gameId);
 
+        SimpleDateFormat isoFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US);
+        isoFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+        json.put("submitted_at", isoFormat.format(new Date()));
+
+        StringBuilder fullName = new StringBuilder(firstName == null ? "" : firstName.trim());
+        if (lastName != null && !lastName.trim().isEmpty()) {
+            if (fullName.length() > 0) {
+                fullName.append(' ');
+            }
+            fullName.append(lastName.trim());
+        }
+        json.put("name", fullName.toString());
+        json.put("email", email == null ? "" : email);
+        json.put("phone", phoneNumber == null ? "" : phoneNumber);
+        json.put("over_18", over18);
+
+        JSONObject customAnswers = new JSONObject();
+        if (customFieldAnswers != null) {
+            for (Map.Entry<String, String> entry : customFieldAnswers.entrySet()) {
+                customAnswers.put(entry.getKey(), entry.getValue());
+            }
+        }
+        json.put("custom_field_answers", customAnswers);
+
+        JSONArray answersFound = new JSONArray();
+        for (PlayerInfo p : correctPlayers) {
+            String yearsPlayed = p.yearsPlayed == null ? "" : p.yearsPlayed.trim();
+            answersFound.put(yearsPlayed.isEmpty() ? p.playerName : p.playerName + " " + yearsPlayed);
+        }
+        json.put("answers_found", answersFound);
+
+        // Legacy keys kept for older consumers
+        json.put("firstName", firstName);
+        json.put("lastName", lastName);
+        json.put("phoneNumber", phoneNumber);
         JSONArray answers = new JSONArray();
         for (PlayerInfo p : correctPlayers) {
             answers.put(p.toJSON());

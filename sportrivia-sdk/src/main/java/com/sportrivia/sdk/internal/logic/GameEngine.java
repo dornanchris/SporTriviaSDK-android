@@ -1,6 +1,7 @@
 package com.sportrivia.sdk.internal.logic;
 
 import com.sportrivia.sdk.internal.data.TeamAbbreviations;
+import com.sportrivia.sdk.internal.models.CollectFields;
 import com.sportrivia.sdk.internal.models.PlayerInfo;
 import com.sportrivia.sdk.internal.services.JsonParser;
 import com.sportrivia.sdk.internal.services.S3DataService;
@@ -9,6 +10,7 @@ import com.sportrivia.sdk.public_api.SporTriviaGameResult;
 import com.sportrivia.sdk.public_api.SporTriviaLogger;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -42,6 +44,9 @@ public class GameEngine {
     private String lastName = "";
     private String email = "";
     private String phoneNumber = "";
+    private boolean over18 = false;
+    private Map<String, String> customFieldAnswers = new HashMap<>();
+    private CollectFields collectFields = CollectFields.legacyDefault();
 
     public GameEngine(S3DataService s3Service) {
         this.s3Service = s3Service;
@@ -61,6 +66,10 @@ public class GameEngine {
             correctPlayerIds.add(normalizePlayerId(id));
         }
         customQuestion = (String) answerKey.get("question");
+        Object rawCollectFields = answerKey.get("collect_fields");
+        collectFields = rawCollectFields instanceof CollectFields
+                ? (CollectFields) rawCollectFields
+                : CollectFields.legacyDefault();
         SporTriviaLogger.info("Answer key loaded: " + correctPlayerIds.size() + " correct IDs");
 
         byte[] playerData = s3Service.downloadPlayerList(sport);
@@ -134,7 +143,7 @@ public class GameEngine {
     public void uploadResults() {
         try {
             byte[] data = JsonParser.formatGameResults(
-                firstName, lastName, email, phoneNumber,
+                firstName, lastName, email, phoneNumber, over18, customFieldAnswers,
                 gameId, correctUserPlayers
             );
             String[] parts = gameId.split("_");
@@ -152,16 +161,28 @@ public class GameEngine {
         }
         return new SporTriviaGameResult(
             gameId, sport, correct, incorrect, maxStreak,
-            firstName, lastName, email, phoneNumber, names
+            firstName, lastName, email, phoneNumber, over18, customFieldAnswers, names
         );
     }
 
     public void setUserInfo(String firstName, String lastName, String email, String phoneNumber) {
+        setUserInfo(firstName, lastName, email, phoneNumber, false, new HashMap<String, String>());
+    }
+
+    public void setUserInfo(String firstName, String lastName, String email, String phoneNumber,
+                            boolean over18, Map<String, String> customFieldAnswers) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
         this.phoneNumber = phoneNumber;
+        this.over18 = over18;
+        this.customFieldAnswers = customFieldAnswers == null
+                ? new HashMap<String, String>()
+                : new HashMap<>(customFieldAnswers);
     }
+
+    /** Data-capture configuration for this game (legacy default when the answer key has none). */
+    public CollectFields getCollectFields() { return collectFields; }
 
     public String getGameId() { return gameId; }
     public Sport getSport() { return sport; }

@@ -21,6 +21,21 @@
             android:layout_marginTop="40dp"
             android:layout_marginBottom="24dp" />
 
+        <TextView
+            android:id="@+id/sportrivia_sdk_form_loading"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/sportrivia_sdk_loading_form"
+            android:textColor="@color/sportrivia_sdk_text"
+            android:layout_marginBottom="16dp" />
+
+        <LinearLayout
+            android:id="@+id/sportrivia_sdk_form_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone">
+
         <EditText
             android:id="@+id/sportrivia_sdk_edit_first_name"
             android:layout_width="match_parent"
@@ -61,6 +76,21 @@
             android:background="@color/sportrivia_sdk_input_bg"
             android:layout_marginBottom="16dp" />
 
+        <LinearLayout
+            android:id="@+id/sportrivia_sdk_custom_fields"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" />
+
+        <CheckBox
+            android:id="@+id/sportrivia_sdk_check_over18"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/sportrivia_sdk_over18"
+            android:textColor="@color/sportrivia_sdk_text"
+            android:layout_marginBottom="12dp"
+            android:visibility="gone" />
+
         <CheckBox
             android:id="@+id/sportrivia_sdk_check_save"
             android:layout_width="wrap_content"
@@ -68,6 +98,8 @@
             android:text="@string/sportrivia_sdk_save_info"
             android:textColor="@color/sportrivia_sdk_text"
             android:layout_marginBottom="24dp" />
+
+        </LinearLayout>
 
         <Button
             android:id="@+id/sportrivia_sdk_btn_submit"

@@ -46,6 +46,10 @@ SporTriviaSDK.configure(
 SporTriviaSDK.launchCustomGame(context, "NYI_Top5A", Sport.NHL, myDelegate);
 ```
 
+## Fan data capture
+
+The player-info screen is built dynamically from the question's **Data Capture** configuration in the SporTrivia portal (`collect_fields` in the answer key JSON) — standard name/email/phone fields, an over-18 checkbox, and custom questions with required flags. Collected answers upload with the game results (`custom_field_answers`) and are exposed on `SporTriviaGameResult` via `isOver18()` / `getCustomFieldAnswers()`. Questions that collect nothing skip the screen; legacy answer keys show the original name/email/phone form. Nothing to configure in your app.
+
 ## Deep linking (QR code launch)
 
 Questions built in the SporTrivia portal with the **"Your own app"** destination produce a QR code that deep links into your app:
