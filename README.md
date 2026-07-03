@@ -96,6 +96,8 @@ private void handleSporTriviaLink(Intent intent) {
 }
 ```
 
+**Optional — verified App Links:** save your signing-cert SHA-256 fingerprint on the portal's Developer → Deep Linking & QR tab and add a second, auto-verified intent filter (`android:scheme="https"`, host and path prefix shown pre-filled on that page, `android:autoVerify="true"`). QR scans then open your app directly with `https://<sportrivia-host>/sdk/r/<your-team>/<question-id>?game=<gameId>&info=<sportCode>` — `SporTriviaDeepLink.parse` handles that form too, so the code above works unchanged. The redirect page and Play Store fallback stay in place for devices without the app.
+
 See the partner setup guide in the iOS repo: <https://github.com/dornanchris/SporTriviaSDK/blob/main/PARTNER_SETUP.md> — it covers credentials, IAM scoping, and the full integration flow on both platforms.
 
 ## License

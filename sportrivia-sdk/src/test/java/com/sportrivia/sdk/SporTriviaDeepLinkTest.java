@@ -28,6 +28,21 @@ public class SporTriviaDeepLinkTest {
     }
 
     @Test
+    public void testParseAppLinkForm() {
+        SporTriviaDeepLink link = SporTriviaDeepLink.parse(
+                "https://sportrivia-app.com/sdk/r/islanders/abc-123?game=NYI_Top5A&info=nhl");
+
+        assertNotNull(link);
+        assertEquals("NYI_Top5A", link.getGameId());
+        assertEquals(Sport.NHL, link.getSport());
+    }
+
+    @Test
+    public void testParseAppLinkWithoutGameParamIsRejected() {
+        assertNull(SporTriviaDeepLink.parse("https://sportrivia-app.com/sdk/r/islanders/abc-123?info=nhl"));
+    }
+
+    @Test
     public void testParseStripsJsonSuffix() {
         SporTriviaDeepLink link = SporTriviaDeepLink.parse("partnerapp://sportrivia/custom/NYI_Top5A.json?info=nhl");
 

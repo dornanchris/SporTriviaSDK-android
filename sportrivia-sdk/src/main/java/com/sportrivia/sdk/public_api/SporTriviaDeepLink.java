@@ -15,6 +15,13 @@ import java.util.Locale;
  * {@code AndroidManifest.xml} intent filter. The path and query are supplied
  * by SporTrivia and identify the question to load.
  *
+ * <p>Apps that opt into verified App Links receive the QR's https URL instead:
+ *
+ * <pre>https://&lt;sportrivia-host&gt;/sdk/r/&lt;team&gt;/&lt;questionId&gt;?game=&lt;gameId&gt;&amp;info=&lt;sportCode&gt;</pre>
+ *
+ * {@code parse} understands both forms, so one handler covers scheme launches
+ * and App Link launches alike.
+ *
  * <p>Usage:
  *
  * <pre>{@code
@@ -85,12 +92,16 @@ public final class SporTriviaDeepLink {
             remainder = remainder.substring(0, queryIndex);
         }
 
-        String gameId = null;
-        String[] segments = remainder.split("/");
-        for (int i = 0; i < segments.length - 1; i++) {
-            if (segments[i].equalsIgnoreCase("custom")) {
-                gameId = segments[i + 1];
-                break;
+        // Verified App Link form carries the game id as a query parameter;
+        // scheme deep links carry it as the path segment after "custom".
+        String gameId = queryParam(query, "game");
+        if (gameId == null || gameId.isEmpty()) {
+            String[] segments = remainder.split("/");
+            for (int i = 0; i < segments.length - 1; i++) {
+                if (segments[i].equalsIgnoreCase("custom")) {
+                    gameId = segments[i + 1];
+                    break;
+                }
             }
         }
         if (gameId == null || gameId.isEmpty()) {
@@ -103,14 +114,7 @@ public final class SporTriviaDeepLink {
             return null;
         }
 
-        String sportCode = null;
-        for (String param : query.split("&")) {
-            int equalsIndex = param.indexOf('=');
-            if (equalsIndex > 0 && param.substring(0, equalsIndex).equalsIgnoreCase("info")) {
-                sportCode = param.substring(equalsIndex + 1);
-                break;
-            }
-        }
+        String sportCode = queryParam(query, "info");
         if (sportCode == null || sportCode.trim().isEmpty()) {
             return null;
         }
@@ -120,5 +124,15 @@ public final class SporTriviaDeepLink {
         } catch (IllegalArgumentException unknownSport) {
             return null;
         }
+    }
+
+    private static String queryParam(String query, String name) {
+        for (String param : query.split("&")) {
+            int equalsIndex = param.indexOf('=');
+            if (equalsIndex > 0 && param.substring(0, equalsIndex).equalsIgnoreCase(name)) {
+                return param.substring(equalsIndex + 1);
+            }
+        }
+        return null;
     }
 }
