@@ -28,7 +28,9 @@ import com.sportrivia.sdk.public_api.SporTriviaDelegate;
 import com.sportrivia.sdk.public_api.SporTriviaSDK;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -44,6 +46,13 @@ public class CustomGameActivity extends AppCompatActivity {
 
     private GameEngine engine;
     private PlayerInfo selectedPlayerInfo;
+    // Maps the exact dropdown row text ("Name (years)") to its player, so a
+    // tap resolves to the right PlayerInfo regardless of the adapter's own
+    // internal filtering/reordering.
+    private final Map<String, PlayerInfo> displayedPlayers = new HashMap<>();
+    // Set while the input text is being replaced programmatically (after a
+    // dropdown tap) so the TextWatcher doesn't clear the selection.
+    private boolean suppressTextWatcher = false;
     private final Handler handler = new Handler(Looper.getMainLooper());
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
@@ -141,28 +150,41 @@ public class CustomGameActivity extends AppCompatActivity {
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
             public void onTextChanged(CharSequence s, int start, int before, int count) {}
             public void afterTextChanged(Editable s) {
-                selectedPlayerInfo = null;
+                if (suppressTextWatcher) {
+                    return;
+                }
                 String input = s.toString();
+
+                // Tapping a dropdown row makes AutoCompleteTextView replace the
+                // text with that row's full "Name (years)" string before any
+                // click listener runs — so an exact match against the rows we
+                // have shown IS the selection. Resolve it here and swap the
+                // input to the bare name (as iOS does).
+                PlayerInfo tapped = displayedPlayers.get(input);
+                if (tapped != null) {
+                    suppressTextWatcher = true;
+                    autoComplete.setText(tapped.playerName, false);
+                    autoComplete.setSelection(autoComplete.getText().length());
+                    suppressTextWatcher = false;
+                    selectedPlayerInfo = tapped;
+                    buttonSubmit.setEnabled(true);
+                    return;
+                }
+
+                selectedPlayerInfo = null;
                 if (input.length() >= 1) {
                     List<PlayerInfo> filtered = PlayerInfoService.filterPlayers(input, engine.getAllPlayers(), 10);
                     List<String> names = new ArrayList<>();
                     for (PlayerInfo p : filtered) {
-                        names.add(p.playerName + " (" + p.yearsPlayed + ")");
+                        String display = p.playerName + " (" + p.yearsPlayed + ")";
+                        names.add(display);
+                        displayedPlayers.put(display, p);
                     }
                     autoCompleteAdapter.clear();
                     autoCompleteAdapter.addAll(names);
                     autoCompleteAdapter.notifyDataSetChanged();
                 }
                 buttonSubmit.setEnabled(!input.trim().isEmpty());
-            }
-        });
-
-        autoComplete.setOnItemClickListener((parent, view, position, id) -> {
-            String input = autoComplete.getText().toString();
-            String name = input.contains(" (") ? input.substring(0, input.lastIndexOf(" (")) : input;
-            List<PlayerInfo> filtered = PlayerInfoService.filterPlayers(name, engine.getAllPlayers(), 10);
-            if (position < filtered.size()) {
-                selectedPlayerInfo = filtered.get(position);
             }
         });
     }
@@ -175,7 +197,10 @@ public class CustomGameActivity extends AppCompatActivity {
         if (selectedPlayerInfo != null) {
             player = selectedPlayerInfo;
         } else {
-            player = PlayerInfoService.selectPlayerFromInput(input, engine.getAllPlayers());
+            // Strip a trailing "(years)" suffix in case the input still holds
+            // a full dropdown row — name matching needs the bare name.
+            String name = input.contains(" (") ? input.substring(0, input.lastIndexOf(" (")).trim() : input;
+            player = PlayerInfoService.selectPlayerFromInput(name, engine.getAllPlayers());
         }
 
         if (engine.isPlayerUsed(player.playerId)) {
