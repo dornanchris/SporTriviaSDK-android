@@ -100,6 +100,8 @@
         android:hint="@string/sportrivia_sdk_enter_player"
         android:padding="16dp"
         android:background="@color/sportrivia_sdk_input_bg"
+        android:textColor="@color/sportrivia_sdk_input_text"
+        android:textColorHint="@color/sportrivia_sdk_input_hint"
         android:completionThreshold="1"
         android:inputType="textPersonName" />
 

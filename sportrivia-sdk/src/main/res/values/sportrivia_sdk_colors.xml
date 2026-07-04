@@ -6,4 +6,6 @@
     <color name="sportrivia_sdk_incorrect">#F44336</color>
     <color name="sportrivia_sdk_text">#FFFFFF</color>
     <color name="sportrivia_sdk_input_bg">#F5F5F5</color>
+    <color name="sportrivia_sdk_input_text">#1A1A1A</color>
+    <color name="sportrivia_sdk_input_hint">#757575</color>
 </resources>

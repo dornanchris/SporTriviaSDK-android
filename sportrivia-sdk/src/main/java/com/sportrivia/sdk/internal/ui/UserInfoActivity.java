@@ -181,6 +181,8 @@ public class UserInfoActivity extends AppCompatActivity {
             EditText input = new EditText(this);
             input.setHint(question.placeholder.isEmpty() ? question.label : question.placeholder);
             input.setBackgroundResource(R.color.sportrivia_sdk_input_bg);
+            input.setTextColor(ContextCompat.getColor(this, R.color.sportrivia_sdk_input_text));
+            input.setHintTextColor(ContextCompat.getColor(this, R.color.sportrivia_sdk_input_hint));
             int padding = (int) (16 * density);
             input.setPadding(padding, padding, padding, padding);
             input.addTextChangedListener(watcher);
