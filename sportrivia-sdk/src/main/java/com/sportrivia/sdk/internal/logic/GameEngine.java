@@ -2,9 +2,11 @@ package com.sportrivia.sdk.internal.logic;
 
 import com.sportrivia.sdk.internal.data.TeamAbbreviations;
 import com.sportrivia.sdk.internal.models.CollectFields;
+import com.sportrivia.sdk.internal.models.LocationResult;
 import com.sportrivia.sdk.internal.models.PlayerInfo;
 import com.sportrivia.sdk.internal.models.Sponsorship;
 import com.sportrivia.sdk.internal.services.JsonParser;
+import com.sportrivia.sdk.internal.services.LocationProvider;
 import com.sportrivia.sdk.internal.services.S3DataService;
 import com.sportrivia.sdk.public_api.Sport;
 import com.sportrivia.sdk.public_api.SporTriviaGameResult;
@@ -13,6 +15,7 @@ import com.sportrivia.sdk.public_api.SporTriviaLogger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -50,6 +53,12 @@ public class GameEngine {
     private CollectFields collectFields = CollectFields.legacyDefault();
     private Sponsorship sponsorship;
     private String responsePath;
+
+    /**
+     * Best-effort device location for the results upload; injected by the
+     * UI layer. Null (e.g. in tests) uploads location_status "unavailable".
+     */
+    private LocationProvider locationProvider;
 
     public GameEngine(S3DataService s3Service) {
         this.s3Service = s3Service;
@@ -155,11 +164,21 @@ public class GameEngine {
         return remainingCorrectPlayers.isEmpty();
     }
 
+    public void setLocationProvider(LocationProvider locationProvider) {
+        this.locationProvider = locationProvider;
+    }
+
     public void uploadResults() {
         try {
+            // Best-effort location: waits at most 8s (on this background
+            // thread) for a fix that started warming when the game opened;
+            // never fails the upload.
+            LocationResult location = locationProvider != null
+                    ? locationProvider.await(8000)
+                    : LocationResult.unavailable();
             byte[] data = JsonParser.formatGameResults(
                 firstName, lastName, email, phoneNumber, over18, customFieldAnswers,
-                gameId, correctUserPlayers
+                gameId, correctUserPlayers, location
             );
             if (responsePath != null && !responsePath.isEmpty()) {
                 // Preferred: the portal embeds the exact upload destination in
@@ -201,8 +220,8 @@ public class GameEngine {
         this.phoneNumber = phoneNumber;
         this.over18 = over18;
         this.customFieldAnswers = customFieldAnswers == null
-                ? new HashMap<String, String>()
-                : new HashMap<>(customFieldAnswers);
+                ? new LinkedHashMap<String, String>()
+                : new LinkedHashMap<>(customFieldAnswers);
     }
 
     /** Data-capture configuration for this game (legacy default when the answer key has none). */

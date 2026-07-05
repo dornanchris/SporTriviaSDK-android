@@ -102,7 +102,8 @@ public class CollectFieldsTest {
 
         byte[] data = JsonParser.formatGameResults(
                 "Casey", "Fan", "casey@example.com", "555-1234",
-                true, customAnswers, "NYI_Top5A", players);
+                true, customAnswers, "NYI_Top5A", players,
+                com.sportrivia.sdk.internal.models.LocationResult.unavailable());
         JSONObject payload = new JSONObject(new String(data, "UTF-8"));
 
         assertEquals("Casey Fan", payload.getString("name"));
@@ -113,9 +114,11 @@ public class CollectFieldsTest {
         JSONArray answersFound = payload.getJSONArray("answers_found");
         assertEquals("Mat Barzal 2016-2024", answersFound.getString(0));
         assertTrue(payload.has("submitted_at"));
-        // Legacy keys kept for older consumers
-        assertEquals("Casey", payload.getString("firstName"));
-        assertEquals("555-1234", payload.getString("phoneNumber"));
-        assertTrue(payload.has("correctAnswers"));
+        // Schema v2: snake_case keys, legacy duplicates dropped
+        assertEquals("Casey", payload.getString("first_name"));
+        assertTrue(payload.has("correct_answers"));
+        assertFalse(payload.has("firstName"));
+        assertFalse(payload.has("phoneNumber"));
+        assertFalse(payload.has("correctAnswers"));
     }
 }

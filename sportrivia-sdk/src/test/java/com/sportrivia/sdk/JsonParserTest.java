@@ -1,5 +1,6 @@
 package com.sportrivia.sdk;
 
+import com.sportrivia.sdk.internal.models.LocationResult;
 import com.sportrivia.sdk.internal.models.PlayerInfo;
 import com.sportrivia.sdk.internal.services.JsonParser;
 
@@ -92,22 +93,122 @@ public class JsonParserTest {
         assertEquals("8471214", players.get(0).playerId);
     }
 
-    @Test
-    public void testFormatGameResults() throws Exception {
-        List<PlayerInfo> correct = List.of(
-            new PlayerInfo("p1", "Player One", "2000-2010")
-        );
+    // ===== Schema v2 upload payload =====
 
+    /**
+     * The documented cross-platform key order — must stay in lockstep with
+     * the iOS SDK's JsonParserTests and PARTNER_SETUP.md.
+     */
+    static final String[] EXPECTED_KEY_ORDER = {
+        "schema_version", "game_id", "submitted_at", "platform", "source",
+        "sdk_version", "first_name", "last_name", "name", "email", "phone",
+        "over_18", "custom_field_answers", "answers_found", "correct_answers",
+        "location", "location_status",
+    };
+
+    private static String formatV2(LocationResult location) throws Exception {
+        List<PlayerInfo> correct = List.of(new PlayerInfo("p1", "Player One", "2000-2010"));
+        Map<String, String> custom = new java.util.LinkedHashMap<>();
+        custom.put("Zebra question", "z");
+        custom.put("Alpha question", "a");
         byte[] result = JsonParser.formatGameResults(
             "Jane", "Smith", "jane@test.com", "555-0000",
-            true, Map.of("How often do you attend games?", "Weekly"),
-            "NYI_Top5A", correct
+            true, custom, "NYI_Top5A", correct, location
         );
+        return new String(result, "UTF-8");
+    }
 
-        String json = new String(result, "UTF-8");
-        assertTrue(json.contains("Jane"));
-        assertTrue(json.contains("NYI_Top5A"));
-        assertTrue(json.contains("Player One"));
-        assertTrue(json.contains("Weekly"));
+    @Test
+    public void testFormatGameResultsSchemaV2() throws Exception {
+        String json = formatV2(LocationResult.unavailable());
+        org.json.JSONObject parsed = new org.json.JSONObject(json);
+
+        assertEquals(2, parsed.getInt("schema_version"));
+        assertEquals("NYI_Top5A", parsed.getString("game_id"));
+        assertEquals("android", parsed.getString("platform"));
+        assertEquals("sdk", parsed.getString("source"));
+        assertEquals(com.sportrivia.sdk.public_api.SporTriviaVersion.SDK_VERSION, parsed.getString("sdk_version"));
+        assertEquals("Jane", parsed.getString("first_name"));
+        assertEquals("Smith", parsed.getString("last_name"));
+        assertEquals("Jane Smith", parsed.getString("name"));
+        assertTrue(parsed.getBoolean("over_18"));
+
+        org.json.JSONArray answers = parsed.getJSONArray("correct_answers");
+        assertEquals(1, answers.length());
+        assertEquals("p1", answers.getJSONObject(0).getString("player_id"));
+        assertEquals("Player One", answers.getJSONObject(0).getString("player_name"));
+        assertEquals("2000-2010", answers.getJSONObject(0).getString("years_played"));
+
+        assertTrue(parsed.isNull("location"));
+        assertEquals("unavailable", parsed.getString("location_status"));
+
+        // Legacy duplicate keys are gone in v2
+        for (String legacy : new String[]{"gameId", "firstName", "lastName", "phoneNumber", "correctAnswers"}) {
+            assertFalse(legacy + " must not be emitted in schema v2", parsed.has(legacy));
+        }
+    }
+
+    @Test
+    public void testFormatGameResultsKeyOrderIsExact() throws Exception {
+        String json = formatV2(LocationResult.unavailable());
+        int lastIndex = -1;
+        for (String key : EXPECTED_KEY_ORDER) {
+            int index = json.indexOf("\"" + key + "\":");
+            assertTrue("key missing: " + key, index >= 0);
+            assertTrue("key out of order: " + key, index > lastIndex);
+            lastIndex = index;
+        }
+    }
+
+    @Test
+    public void testFormatGameResultsCustomAnswersAlphabetical() throws Exception {
+        String json = formatV2(LocationResult.unavailable());
+        assertTrue(json.indexOf("Alpha question") < json.indexOf("Zebra question"));
+    }
+
+    @Test
+    public void testFormatGameResultsTimestampFormat() throws Exception {
+        org.json.JSONObject parsed = new org.json.JSONObject(formatV2(LocationResult.unavailable()));
+        assertTrue(parsed.getString("submitted_at")
+                .matches("\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z"));
+    }
+
+    @Test
+    public void testFormatGameResultsWithGrantedLocation() throws Exception {
+        String json = formatV2(LocationResult.granted(40.75, -73.99, 12.5, "2026-07-05T12:00:00Z"));
+        org.json.JSONObject parsed = new org.json.JSONObject(json);
+        org.json.JSONObject location = parsed.getJSONObject("location");
+
+        assertEquals(40.75, location.getDouble("latitude"), 1e-9);
+        assertEquals(-73.99, location.getDouble("longitude"), 1e-9);
+        assertEquals(12.5, location.getDouble("accuracy_meters"), 1e-9);
+        assertEquals("2026-07-05T12:00:00Z", location.getString("captured_at"));
+        assertEquals("granted", parsed.getString("location_status"));
+
+        // Inner key order is part of the schema too
+        assertTrue(json.indexOf("\"latitude\"") < json.indexOf("\"longitude\""));
+        assertTrue(json.indexOf("\"longitude\"") < json.indexOf("\"accuracy_meters\""));
+        assertTrue(json.indexOf("\"accuracy_meters\"") < json.indexOf("\"captured_at\""));
+    }
+
+    @Test
+    public void testFormatGameResultsLocationStatuses() throws Exception {
+        assertEquals("denied", new org.json.JSONObject(formatV2(LocationResult.denied())).getString("location_status"));
+        assertEquals("timeout", new org.json.JSONObject(formatV2(LocationResult.timeout())).getString("location_status"));
+        // Null location argument behaves like unavailable
+        byte[] result = JsonParser.formatGameResults(
+            "J", "S", "", "", false, null, "g", List.of(), null);
+        assertEquals("unavailable", new org.json.JSONObject(new String(result, "UTF-8")).getString("location_status"));
+    }
+
+    @Test
+    public void testFormatGameResultsEscapesUserInput() throws Exception {
+        byte[] result = JsonParser.formatGameResults(
+            "Ja\"ne\n", "Smi\\th", "a@b.c", "", false, null, "g", List.of(),
+            LocationResult.unavailable());
+        // Must parse back cleanly — user input cannot break the JSON
+        org.json.JSONObject parsed = new org.json.JSONObject(new String(result, "UTF-8"));
+        assertEquals("Ja\"ne", parsed.getString("first_name"));
+        assertEquals("Smi\\th", parsed.getString("last_name"));
     }
 }

@@ -2,6 +2,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Location for game-result uploads (best-effort; see PARTNER_SETUP.md).
+         Host apps that must not request location can strip these with
+         manifest-merger: <uses-permission android:name="..." tools:node="remove" /> -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
     <application>
         <activity

@@ -2,12 +2,15 @@ package com.sportrivia.sdk.internal.logic;
 
 import com.sportrivia.sdk.internal.models.PlayerInfo;
 
-import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Fuzzy player name matching and autocomplete filtering.
+ *
+ * <p>Per-keystroke work is a plain {@code String.contains} against each
+ * player's precomputed {@link PlayerInfo#normalizedName} — only the input is
+ * normalized, once per call.
  */
 public class PlayerInfoService {
 
@@ -17,11 +20,13 @@ public class PlayerInfoService {
         }
 
         String normalizedInput = normalize(input);
+        if (normalizedInput.isEmpty()) {
+            return new ArrayList<>();
+        }
         List<PlayerInfo> results = new ArrayList<>();
 
         for (PlayerInfo player : allPlayers) {
-            String normalizedName = normalize(player.playerName);
-            if (normalizedName.contains(normalizedInput)) {
+            if (player.normalizedName.contains(normalizedInput)) {
                 results.add(player);
                 if (results.size() >= limit) break;
             }
@@ -33,8 +38,7 @@ public class PlayerInfoService {
         String normalizedInput = normalize(input);
 
         for (PlayerInfo player : allPlayers) {
-            String normalizedName = normalize(player.playerName);
-            if (normalizedName.equals(normalizedInput)) {
+            if (player.normalizedName.equals(normalizedInput)) {
                 return player;
             }
         }
@@ -43,9 +47,6 @@ public class PlayerInfoService {
     }
 
     public static String normalize(String str) {
-        if (str == null) return "";
-        String decomposed = Normalizer.normalize(str, Normalizer.Form.NFD);
-        String noDiacritics = decomposed.replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
-        return noDiacritics.toLowerCase().replaceAll("[^a-z0-9]", "");
+        return PlayerInfo.normalize(str);
     }
 }

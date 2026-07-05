@@ -1,6 +1,7 @@
 package com.sportrivia.sdk.internal.ui;
 
 import com.sportrivia.sdk.internal.logic.GameEngine;
+import com.sportrivia.sdk.internal.services.LocationService;
 import com.sportrivia.sdk.internal.services.S3DataService;
 import com.sportrivia.sdk.public_api.Sport;
 import com.sportrivia.sdk.public_api.SporTriviaSDK;
@@ -13,6 +14,7 @@ class SporTriviaSession {
     private static GameEngine gameEngine;
     private static byte[] teamImageBytes;
     private static byte[] sponsorBannerBytes;
+    private static LocationService locationService;
 
     static GameEngine getOrCreateEngine() {
         if (gameEngine == null) {
@@ -44,9 +46,18 @@ class SporTriviaSession {
         return sponsorBannerBytes;
     }
 
+    static void setLocationService(LocationService service) {
+        locationService = service;
+    }
+
+    static LocationService getLocationService() {
+        return locationService;
+    }
+
     static void clear() {
         gameEngine = null;
         teamImageBytes = null;
         sponsorBannerBytes = null;
+        locationService = null;
     }
 }

@@ -54,6 +54,25 @@ Questions can carry a sponsorship chosen in the SporTrivia portal. The answer ke
 
 The player-info screen is built dynamically from the question's **Data Capture** configuration in the SporTrivia portal (`collect_fields` in the answer key JSON) — standard name/email/phone fields, an over-18 checkbox, and custom questions with required flags. Collected answers upload with the game results (`custom_field_answers`) and are exposed on `SporTriviaGameResult` via `isOver18()` / `getCustomFieldAnswers()`. Questions that collect nothing skip the screen; legacy answer keys show the original name/email/phone form. Nothing to configure in your app.
 
+## Game result uploads & location
+
+When a game ends the SDK uploads one JSON document (schema v2) with the fan's
+contact info, answers, and best-effort device location — identical fields and
+key order on Android and iOS. The full field table, sample payload, and
+v1→v2 changes live in the iOS repo's
+[PARTNER_SETUP.md](https://github.com/dornanchris/SporTriviaSDK/blob/main/PARTNER_SETUP.md)
+(section "Game Result Uploads (schema v2)").
+
+Location notes for Android partners:
+
+- The SDK manifest declares `ACCESS_FINE_LOCATION`/`ACCESS_COARSE_LOCATION`
+  (framework `LocationManager`, no Play Services); manifest merging adds them
+  to your app. The permission prompt appears on the SDK's player-info screen.
+- Declining, airplane mode, or a slow fix never blocks the game or the upload —
+  the payload carries `location: null` plus a `location_status` explaining why.
+- Declare location collection in your Play Console **Data safety** form, or
+  strip the permissions with `tools:node="remove"` to ship without location.
+
 ## Deep linking (QR code launch)
 
 Questions built in the SporTrivia portal with the **"Your own app"** destination produce a QR code that deep links into your app:

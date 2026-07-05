@@ -56,6 +56,10 @@ public class CustomGameActivity extends AppCompatActivity {
     private final Handler handler = new Handler(Looper.getMainLooper());
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
+    private static final long FILTER_DEBOUNCE_MS = 200;
+    private int filterGeneration = 0;
+    private Runnable pendingFilter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -137,12 +141,22 @@ public class CustomGameActivity extends AppCompatActivity {
     private void setupTeamImage() {
         byte[] imageBytes = SporTriviaSession.getTeamImageBytes();
         if (imageBytes != null) {
-            imageTeam1.setImageBitmap(BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length));
+            // Decode off the UI thread — team images can be large.
+            executor.execute(() -> {
+                android.graphics.Bitmap bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
+                if (bitmap != null) {
+                    runOnUiThread(() -> imageTeam1.setImageBitmap(bitmap));
+                }
+            });
         }
     }
 
     private void setupAutoComplete() {
-        autoCompleteAdapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, new ArrayList<>());
+        // Pass-through filter: suggestions are produced by our own debounced
+        // background filter below. ArrayAdapter's built-in ArrayFilter would
+        // otherwise prefix-re-filter the rows we just published (and its
+        // diacritic-sensitive startsWith can hide names like "José ...").
+        autoCompleteAdapter = new NoFilterArrayAdapter(this, android.R.layout.simple_dropdown_item_1line);
         autoComplete.setAdapter(autoCompleteAdapter);
         autoComplete.setThreshold(1);
 
@@ -172,21 +186,79 @@ public class CustomGameActivity extends AppCompatActivity {
                 }
 
                 selectedPlayerInfo = null;
-                if (input.length() >= 1) {
-                    List<PlayerInfo> filtered = PlayerInfoService.filterPlayers(input, engine.getAllPlayers(), 10);
-                    List<String> names = new ArrayList<>();
-                    for (PlayerInfo p : filtered) {
-                        String display = p.playerName + " (" + p.yearsPlayed + ")";
-                        names.add(display);
-                        displayedPlayers.put(display, p);
-                    }
-                    autoCompleteAdapter.clear();
-                    autoCompleteAdapter.addAll(names);
-                    autoCompleteAdapter.notifyDataSetChanged();
-                }
                 buttonSubmit.setEnabled(!input.trim().isEmpty());
+                scheduleFilter(input);
             }
         });
+    }
+
+    /**
+     * Debounce keystrokes (200 ms), run the ~20k-player scan on the background
+     * executor, and publish results only if the input hasn't changed since —
+     * the previous synchronous per-keystroke scan on the UI thread was the
+     * source of typing lag.
+     */
+    private void scheduleFilter(String input) {
+        if (pendingFilter != null) {
+            handler.removeCallbacks(pendingFilter);
+            pendingFilter = null;
+        }
+        final int generation = ++filterGeneration;
+
+        if (input.isEmpty()) {
+            displayedPlayers.clear();
+            autoCompleteAdapter.clear();
+            return;
+        }
+
+        pendingFilter = () -> executor.execute(() -> {
+            List<PlayerInfo> filtered = PlayerInfoService.filterPlayers(input, engine.getAllPlayers(), 10);
+            runOnUiThread(() -> {
+                if (generation != filterGeneration) {
+                    return; // a newer keystroke superseded this result
+                }
+                if (!input.equals(autoComplete.getText().toString())) {
+                    return;
+                }
+                displayedPlayers.clear();
+                List<String> names = new ArrayList<>();
+                for (PlayerInfo p : filtered) {
+                    String display = p.playerName + " (" + p.yearsPlayed + ")";
+                    names.add(display);
+                    displayedPlayers.put(display, p);
+                }
+                autoCompleteAdapter.clear();
+                autoCompleteAdapter.addAll(names);
+                if (!names.isEmpty() && autoComplete.hasFocus()) {
+                    autoComplete.showDropDown();
+                }
+            });
+        });
+        handler.postDelayed(pendingFilter, FILTER_DEBOUNCE_MS);
+    }
+
+    /** ArrayAdapter whose filter is a no-op — see setupAutoComplete. */
+    private static class NoFilterArrayAdapter extends ArrayAdapter<String> {
+        NoFilterArrayAdapter(android.content.Context context, int resource) {
+            super(context, resource, new ArrayList<>());
+        }
+
+        @Override
+        public android.widget.Filter getFilter() {
+            return new android.widget.Filter() {
+                @Override
+                protected FilterResults performFiltering(CharSequence constraint) {
+                    FilterResults results = new FilterResults();
+                    results.count = getCount();
+                    return results;
+                }
+
+                @Override
+                protected void publishResults(CharSequence constraint, FilterResults results) {
+                    notifyDataSetChanged();
+                }
+            };
+        }
     }
 
     private void onSubmit() {

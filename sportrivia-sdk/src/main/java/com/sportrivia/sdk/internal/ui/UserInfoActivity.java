@@ -18,6 +18,7 @@ import androidx.core.content.ContextCompat;
 import com.sportrivia.sdk.R;
 import com.sportrivia.sdk.internal.logic.GameEngine;
 import com.sportrivia.sdk.internal.models.CollectFields;
+import com.sportrivia.sdk.internal.services.LocationService;
 import com.sportrivia.sdk.public_api.Sport;
 import com.sportrivia.sdk.public_api.SporTriviaLogger;
 import com.sportrivia.sdk.public_api.SporTriviaSDK;
@@ -71,6 +72,13 @@ public class UserInfoActivity extends AppCompatActivity {
         gameId = getIntent().getStringExtra("gameId");
         sportCode = getIntent().getStringExtra("sport");
 
+        // Location for the results upload: prompt on this screen (the entry
+        // point of every game flow) and start warming up a fix. Declining
+        // never blocks the form or the game.
+        LocationService locationService = new LocationService(this);
+        SporTriviaSession.setLocationService(locationService);
+        locationService.requestPermissionIfNeeded(this);
+
         SharedPreferences prefs = getSharedPreferences("sportrivia_sdk", MODE_PRIVATE);
         if (prefs.getBoolean("saveUserInfo", false)) {
             editFirstName.setText(prefs.getString("firstName", ""));
@@ -95,6 +103,7 @@ public class UserInfoActivity extends AppCompatActivity {
         executor.execute(() -> {
             try {
                 GameEngine engine = SporTriviaSession.getOrCreateEngine();
+                engine.setLocationProvider(SporTriviaSession.getLocationService());
                 Sport sport = Sport.fromCode(sportCode);
                 engine.loadGame(gameId, sport);
 
@@ -197,6 +206,15 @@ public class UserInfoActivity extends AppCompatActivity {
         formLoading.setVisibility(View.GONE);
         formContainer.setVisibility(View.VISIBLE);
         updateSubmitButton();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        LocationService service = SporTriviaSession.getLocationService();
+        if (service != null) {
+            service.onPermissionResult(requestCode);
+        }
     }
 
     private void updateSubmitButton() {
