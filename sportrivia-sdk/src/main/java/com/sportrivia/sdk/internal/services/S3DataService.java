@@ -93,6 +93,20 @@ public class S3DataService {
         return download(key);
     }
 
+    /** Upload game results to the response path embedded in the answer key. */
+    public void uploadGameResults(String responsePath, byte[] data) throws Exception {
+        String folder = responsePath;
+        while (folder.endsWith("/")) {
+            folder = folder.substring(0, folder.length() - 1);
+        }
+        String key = folder + "/" + UUID.randomUUID().toString() + ".json";
+        upload(key, data);
+    }
+
+    /**
+     * Upload game results deriving the path from the gameId (legacy — used
+     * when the answer key predates the embedded response_path).
+     */
     public void uploadGameResults(Sport sport, String teamName, String suffix, byte[] data) throws Exception {
         String folder = "custom/" + sport.getLeagueKey() + "/" + teamName + "/" + suffix;
         String key = folder + "/" + UUID.randomUUID().toString() + ".json";

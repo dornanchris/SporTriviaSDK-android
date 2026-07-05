@@ -49,6 +49,7 @@ public class GameEngine {
     private Map<String, String> customFieldAnswers = new HashMap<>();
     private CollectFields collectFields = CollectFields.legacyDefault();
     private Sponsorship sponsorship;
+    private String responsePath;
 
     public GameEngine(S3DataService s3Service) {
         this.s3Service = s3Service;
@@ -74,6 +75,8 @@ public class GameEngine {
                 : CollectFields.legacyDefault();
         Object rawSponsorship = answerKey.get("sponsorship");
         sponsorship = rawSponsorship instanceof Sponsorship ? (Sponsorship) rawSponsorship : null;
+        Object rawResponsePath = answerKey.get("response_path");
+        responsePath = rawResponsePath instanceof String ? ((String) rawResponsePath).trim() : null;
         SporTriviaLogger.info("Answer key loaded: " + correctPlayerIds.size() + " correct IDs");
 
         byte[] playerData = s3Service.downloadPlayerList(sport);
@@ -158,9 +161,18 @@ public class GameEngine {
                 firstName, lastName, email, phoneNumber, over18, customFieldAnswers,
                 gameId, correctUserPlayers
             );
-            String[] parts = gameId.split("_");
-            String suffix = parts.length > 1 ? gameId.substring(parts[0].length() + 1) : "";
-            s3Service.uploadGameResults(sport, team1Name, suffix, data);
+            if (responsePath != null && !responsePath.isEmpty()) {
+                // Preferred: the portal embeds the exact upload destination in
+                // the answer key so results land where the portal export reads.
+                s3Service.uploadGameResults(responsePath, data);
+            } else {
+                // Legacy answer keys (no response_path): derive a path from the
+                // gameId. For partner accounts this folder may not match the
+                // portal export's location — republish the question to fix.
+                String[] parts = gameId.split("_");
+                String suffix = parts.length > 1 ? gameId.substring(parts[0].length() + 1) : "";
+                s3Service.uploadGameResults(sport, team1Name, suffix, data);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }

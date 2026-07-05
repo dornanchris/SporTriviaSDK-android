@@ -43,6 +43,34 @@ public class JsonParserTest {
     }
 
     @Test
+    public void testParseAnswerKeyWithResponsePath() throws Exception {
+        String json = "{\"combo\":\"custom_who-holds-the-home-run-record\",\"type\":2,\"player_id\":[\"p1\"],"
+                + "\"response_path\":\"custom/MLB/CD Test/who-holds-the-home-run-record/responses/\"}";
+
+        Map<String, Object> result = JsonParser.parseAnswerKey(json.getBytes("UTF-8"));
+
+        assertEquals("custom/MLB/CD Test/who-holds-the-home-run-record/responses/", result.get("response_path"));
+    }
+
+    @Test
+    public void testParseAnswerKeyWithoutResponsePath() throws Exception {
+        String json = "{\"combo\":\"NYI_Top5A\",\"type\":2,\"player_id\":[\"p1\"]}";
+
+        Map<String, Object> result = JsonParser.parseAnswerKey(json.getBytes("UTF-8"));
+
+        assertNull(result.get("response_path"));
+    }
+
+    @Test
+    public void testParseAnswerKeyWithNullResponsePath() throws Exception {
+        String json = "{\"combo\":\"NYI_Top5A\",\"type\":2,\"player_id\":[\"p1\"],\"response_path\":null}";
+
+        Map<String, Object> result = JsonParser.parseAnswerKey(json.getBytes("UTF-8"));
+
+        assertNull(result.get("response_path"));
+    }
+
+    @Test
     public void testParsePlayerList() throws Exception {
         String json = "[{\"player_id\":\"gretz01\",\"Player\":\"Wayne Gretzky\",\"first_season\":\"1979\",\"last_season\":\"1999\"}]";
         byte[] data = json.getBytes("UTF-8");
@@ -72,6 +100,7 @@ public class JsonParserTest {
 
         byte[] result = JsonParser.formatGameResults(
             "Jane", "Smith", "jane@test.com", "555-0000",
+            true, Map.of("How often do you attend games?", "Weekly"),
             "NYI_Top5A", correct
         );
 
@@ -79,5 +108,6 @@ public class JsonParserTest {
         assertTrue(json.contains("Jane"));
         assertTrue(json.contains("NYI_Top5A"));
         assertTrue(json.contains("Player One"));
+        assertTrue(json.contains("Weekly"));
     }
 }

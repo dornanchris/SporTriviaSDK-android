@@ -49,6 +49,14 @@ public class JsonParser {
         if (sponsorship != null) {
             result.put("sponsorship", sponsorship);
         }
+
+        // S3 prefix where results must be uploaded (e.g.
+        // "custom/MLB/CD Test/who-holds-the-home-run-record/responses/");
+        // absent on answer keys published before the portal embedded it.
+        String responsePath = json.isNull("response_path") ? "" : json.optString("response_path", "");
+        if (!responsePath.isEmpty()) {
+            result.put("response_path", responsePath);
+        }
         return result;
     }
 
