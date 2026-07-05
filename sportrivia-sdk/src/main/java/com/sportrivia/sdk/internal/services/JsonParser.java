@@ -183,6 +183,9 @@ public class JsonParser {
         json.key("location_status").value(location.status);
 
         json.endObject();
-        return json.toString().getBytes("UTF-8");
+        // Pretty-printed (one field per line) for readable exports; JSONStringer
+        // already guarantees the cross-platform key order, JsonPretty only adds
+        // whitespace.
+        return JsonPretty.indent(json.toString()).getBytes("UTF-8");
     }
 }

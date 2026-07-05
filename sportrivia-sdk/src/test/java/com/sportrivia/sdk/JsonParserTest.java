@@ -167,6 +167,17 @@ public class JsonParserTest {
     }
 
     @Test
+    public void testFormatGameResultsIsPrettyPrinted() throws Exception {
+        String json = formatV2(LocationResult.unavailable());
+        // One field per line: a newline separates top-level keys.
+        assertTrue("output should be multi-line", json.contains("\n"));
+        assertTrue(json.contains("\"schema_version\": 2"));
+        // Still valid JSON with the same content.
+        org.json.JSONObject parsed = new org.json.JSONObject(json);
+        assertEquals("NYI_Top5A", parsed.getString("game_id"));
+    }
+
+    @Test
     public void testFormatGameResultsTimestampFormat() throws Exception {
         org.json.JSONObject parsed = new org.json.JSONObject(formatV2(LocationResult.unavailable()));
         assertTrue(parsed.getString("submitted_at")
