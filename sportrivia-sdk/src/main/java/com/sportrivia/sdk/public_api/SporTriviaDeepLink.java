@@ -133,9 +133,12 @@ public final class SporTriviaDeepLink {
      * Checks the system clipboard for a SporTrivia deep link URL.
      *
      * <p>The SporTrivia redirect page copies the deep link to the clipboard
-     * before sending the user to the Play Store. Call this method once in
-     * your launcher Activity's {@code onCreate} to recover the deep link
-     * after the user installs and opens the app for the first time.
+     * before sending the user to the Play Store. Call this method once your
+     * launcher Activity has input focus (for example from
+     * {@code onWindowFocusChanged(true)}) to recover the deep link after the
+     * user installs and opens the app for the first time. Android only permits
+     * clipboard reads while your app is focused, so calling it from
+     * {@code onCreate} is denied by the OS and returns {@code null}.
      *
      * <p>If a valid deep link is found it is consumed (the clipboard is
      * cleared) so it will not trigger again on subsequent launches.
