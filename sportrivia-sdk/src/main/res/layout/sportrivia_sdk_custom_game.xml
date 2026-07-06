@@ -2,8 +2,9 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/sportrivia_sdk_background"
-    android:padding="16dp">
+    android:background="@drawable/sportrivia_sdk_bg_gradient"
+    android:padding="16dp"
+    android:fitsSystemWindows="true">
 
     <!-- Exit button (asks for confirmation) -->
     <ImageButton
@@ -99,7 +100,7 @@
         android:layout_marginTop="20dp"
         android:hint="@string/sportrivia_sdk_enter_player"
         android:padding="16dp"
-        android:background="@color/sportrivia_sdk_input_bg"
+        android:background="@drawable/sportrivia_sdk_field"
         android:textColor="@color/sportrivia_sdk_input_text"
         android:textColorHint="@color/sportrivia_sdk_input_hint"
         android:completionThreshold="1"

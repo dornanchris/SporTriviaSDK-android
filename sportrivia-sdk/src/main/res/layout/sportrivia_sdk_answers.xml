@@ -2,9 +2,10 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#282D2F"
+    android:background="@drawable/sportrivia_sdk_bg_gradient"
     android:orientation="vertical"
-    android:padding="16dp">
+    android:padding="16dp"
+    android:fitsSystemWindows="true">
 
     <TextView
         android:layout_width="wrap_content"
@@ -24,14 +25,14 @@
         android:orientation="horizontal"
         android:gravity="center_vertical"
         android:padding="12dp"
-        android:background="@android:color/white">
+        android:background="@drawable/sportrivia_sdk_card">
 
         <TextView
             android:id="@+id/sportrivia_sdk_text_team_name"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:textColor="@android:color/black"
+            android:textColor="@color/sportrivia_sdk_text"
             android:textStyle="bold"
             android:textSize="16sp" />
 
@@ -47,7 +48,7 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:background="@android:color/white">
+        android:background="@drawable/sportrivia_sdk_card">
 
         <TableLayout
             android:id="@+id/sportrivia_sdk_table_answers"
