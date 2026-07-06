@@ -1,5 +1,8 @@
 package com.sportrivia.sdk.public_api;
 
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
 import android.net.Uri;
 
 import java.util.Locale;
@@ -122,6 +125,56 @@ public final class SporTriviaDeepLink {
         try {
             return new SporTriviaDeepLink(gameId, Sport.fromCode(sportCode));
         } catch (IllegalArgumentException unknownSport) {
+            return null;
+        }
+    }
+
+    /**
+     * Checks the system clipboard for a SporTrivia deep link URL.
+     *
+     * <p>The SporTrivia redirect page copies the deep link to the clipboard
+     * before sending the user to the Play Store. Call this method once in
+     * your launcher Activity's {@code onCreate} to recover the deep link
+     * after the user installs and opens the app for the first time.
+     *
+     * <p>If a valid deep link is found it is consumed (the clipboard is
+     * cleared) so it will not trigger again on subsequent launches.
+     *
+     * @param context an Android Context (Activity or Application)
+     * @return a parsed {@link SporTriviaDeepLink} if the clipboard contained
+     *         a valid game link, or {@code null} otherwise
+     */
+    public static SporTriviaDeepLink checkClipboard(Context context) {
+        try {
+            ClipboardManager clipboard =
+                    (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+            if (clipboard == null || !clipboard.hasPrimaryClip()) {
+                SporTriviaLogger.debug("Clipboard: empty or unavailable");
+                return null;
+            }
+
+            ClipData clip = clipboard.getPrimaryClip();
+            if (clip == null || clip.getItemCount() == 0) {
+                return null;
+            }
+
+            String text = clip.getItemAt(0).coerceToText(context).toString();
+            if (text.isEmpty()) {
+                return null;
+            }
+
+            SporTriviaDeepLink link = parse(text);
+            if (link == null) {
+                SporTriviaLogger.debug("Clipboard: not a SporTrivia deep link");
+                return null;
+            }
+
+            SporTriviaLogger.info("Clipboard: found deep link gameId=" +
+                    link.getGameId() + ", sport=" + link.getSport().getCode());
+            clipboard.setPrimaryClip(ClipData.newPlainText("", ""));
+            return link;
+        } catch (Exception e) {
+            SporTriviaLogger.error("Clipboard check failed: " + e.getMessage());
             return null;
         }
     }
