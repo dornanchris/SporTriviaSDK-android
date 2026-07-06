@@ -46,6 +46,85 @@ SporTriviaSDK.configure(
 SporTriviaSDK.launchCustomGame(context, "NYI_Top5A", Sport.NHL, myDelegate);
 ```
 
+## Sponsorships
+
+Questions can carry a sponsorship chosen in the SporTrivia portal. The answer key JSON embeds a `sponsorship` object (brand, click-through URL, banner S3 key); the SDK downloads the banner and shows it as a tappable strip on the game and game-over screens automatically. No sponsorship on the question — no banner. Requires `sponsorships/*` read access in your partner IAM policy.
+
+## Fan data capture
+
+The player-info screen is built dynamically from the question's **Data Capture** configuration in the SporTrivia portal (`collect_fields` in the answer key JSON) — standard name/email/phone fields, an over-18 checkbox, and custom questions with required flags. Collected answers upload with the game results (`custom_field_answers`) and are exposed on `SporTriviaGameResult` via `isOver18()` / `getCustomFieldAnswers()`. Questions that collect nothing skip the screen; legacy answer keys show the original name/email/phone form. Nothing to configure in your app.
+
+## Game result uploads & location
+
+When a game ends the SDK uploads one JSON document (schema v2) with the fan's
+contact info, answers, and best-effort device location — identical fields and
+key order on Android and iOS. The full field table, sample payload, and
+v1→v2 changes live in the iOS repo's
+[PARTNER_SETUP.md](https://github.com/dornanchris/SporTriviaSDK/blob/main/PARTNER_SETUP.md)
+(section "Game Result Uploads (schema v2)").
+
+Location notes for Android partners:
+
+- The SDK manifest declares `ACCESS_FINE_LOCATION`/`ACCESS_COARSE_LOCATION`
+  (framework `LocationManager`, no Play Services); manifest merging adds them
+  to your app. The permission prompt appears on the SDK's player-info screen.
+- Declining, airplane mode, or a slow fix never blocks the game or the upload —
+  the payload carries `location: null` plus a `location_status` explaining why.
+- Declare location collection in your Play Console **Data safety** form, or
+  strip the permissions with `tools:node="remove"` to ship without location.
+
+## Deep linking (QR code launch)
+
+Questions built in the SporTrivia portal with the **"Your own app"** destination produce a QR code that deep links into your app:
+
+```
+yourscheme://sportrivia/custom/<gameId>?info=<sportCode>
+```
+
+If the app isn't installed, the QR's hosted redirect page saves the game info and sends the fan to your Google Play listing instead. Save your URL scheme, package name, and store URLs on the portal's **Developer → Deep Linking & QR** tab to enable this.
+
+**Step 1.** Register the scheme in `app/src/main/AndroidManifest.xml` on the activity that should receive the launch (`android:exported="true"` is required on Android 12+):
+
+```xml
+<activity
+    android:name=".MainActivity"
+    android:exported="true"
+    android:launchMode="singleTask">
+
+    <intent-filter>
+        <action android:name="android.intent.action.VIEW" />
+        <category android:name="android.intent.category.DEFAULT" />
+        <category android:name="android.intent.category.BROWSABLE" />
+        <data android:scheme="yourscheme" android:host="sportrivia" />
+    </intent-filter>
+</activity>
+```
+
+**Step 2.** Parse the link and launch the game:
+
+```java
+@Override
+protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    handleSporTriviaLink(getIntent());
+}
+
+@Override
+protected void onNewIntent(Intent intent) {
+    super.onNewIntent(intent);
+    handleSporTriviaLink(intent);
+}
+
+private void handleSporTriviaLink(Intent intent) {
+    SporTriviaDeepLink link = SporTriviaDeepLink.parse(intent.getData());
+    if (link != null) {
+        SporTriviaSDK.launchCustomGame(this, link.getGameId(), link.getSport(), myDelegate);
+    }
+}
+```
+
+**Optional — verified App Links:** save your signing-cert SHA-256 fingerprint on the portal's Developer → Deep Linking & QR tab and add a second, auto-verified intent filter (`android:scheme="https"`, host and path prefix shown pre-filled on that page, `android:autoVerify="true"`). QR scans then open your app directly with `https://<sportrivia-host>/sdk/r/<your-team>/<question-id>?game=<gameId>&info=<sportCode>` — `SporTriviaDeepLink.parse` handles that form too, so the code above works unchanged. The redirect page and Play Store fallback stay in place for devices without the app.
+
 See the partner setup guide in the iOS repo: <https://github.com/dornanchris/SporTriviaSDK/blob/main/PARTNER_SETUP.md> — it covers credentials, IAM scoping, and the full integration flow on both platforms.
 
 ## License

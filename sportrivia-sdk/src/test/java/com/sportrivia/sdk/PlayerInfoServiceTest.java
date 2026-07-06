@@ -78,4 +78,52 @@ public class PlayerInfoServiceTest {
         assertEquals("oneill", PlayerInfoService.normalize("O'Neill"));
         assertEquals("stlouis", PlayerInfoService.normalize("St. Louis"));
     }
+
+    @Test
+    public void testNormalizedNamePrecomputedAtConstruction() {
+        PlayerInfo player = new PlayerInfo("p1", "José Peña", "2004-2018");
+        assertEquals("josepena", player.normalizedName);
+    }
+
+    @Test
+    public void testFilterMatchesDiacriticsViaPrecomputedName() {
+        List<PlayerInfo> players = Arrays.asList(
+            new PlayerInfo("p1", "José Peña", "2004-2018"),
+            new PlayerInfo("p2", "Wayne Gretzky", "1979-1999")
+        );
+
+        List<PlayerInfo> result = PlayerInfoService.filterPlayers("jose pena", players, 10);
+        assertEquals(1, result.size());
+        assertEquals("p1", result.get(0).playerId);
+    }
+
+    @Test
+    public void testFilterEarlyExitsOnLargeList() {
+        // 30k synthetic players; the first 10 match — the filter must stop
+        // there (limit early-break) and stay fast.
+        List<PlayerInfo> players = new java.util.ArrayList<>();
+        for (int i = 0; i < 10; i++) {
+            players.add(new PlayerInfo("m" + i, "Common Target " + i, "2000-2010"));
+        }
+        for (int i = 0; i < 30000; i++) {
+            players.add(new PlayerInfo("f" + i, "Filler Player " + i, "2000-2010"));
+        }
+
+        long start = System.nanoTime();
+        List<PlayerInfo> result = PlayerInfoService.filterPlayers("common target", players, 10);
+        long elapsedMs = (System.nanoTime() - start) / 1_000_000;
+
+        assertEquals(10, result.size());
+        assertTrue("filter took " + elapsedMs + "ms — precomputed names should make this near-instant",
+                elapsedMs < 250);
+    }
+
+    @Test
+    public void testFilterInputThatNormalizesToEmpty() {
+        List<PlayerInfo> players = Arrays.asList(
+            new PlayerInfo("p1", "Wayne Gretzky", "1979-1999")
+        );
+
+        assertTrue(PlayerInfoService.filterPlayers("!!!", players, 10).isEmpty());
+    }
 }

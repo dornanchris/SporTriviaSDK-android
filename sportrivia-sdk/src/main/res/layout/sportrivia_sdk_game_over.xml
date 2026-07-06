@@ -7,6 +7,24 @@
     android:gravity="center"
     android:padding="24dp">
 
+    <ImageView
+        android:id="@+id/sportrivia_sdk_go_sponsor_banner"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:scaleType="fitCenter"
+        android:visibility="gone"
+        android:layout_marginBottom="4dp"
+        android:contentDescription="@null" />
+
+    <TextView
+        android:id="@+id/sportrivia_sdk_go_text_sponsor"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/sportrivia_sdk_text"
+        android:textSize="12sp"
+        android:visibility="gone"
+        android:layout_marginBottom="16dp" />
+
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

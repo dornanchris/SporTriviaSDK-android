@@ -7,6 +7,9 @@
     <string name="sportrivia_sdk_email">Email</string>
     <string name="sportrivia_sdk_phone">Phone Number</string>
     <string name="sportrivia_sdk_save_info">Save my info</string>
+    <string name="sportrivia_sdk_over18">I am over 18</string>
+    <string name="sportrivia_sdk_sponsored_by">Sponsored by: %1$s</string>
+    <string name="sportrivia_sdk_loading_form">Loading&#8230;</string>
     <string name="sportrivia_sdk_submit">Submit</string>
     <string name="sportrivia_sdk_cancel">Cancel</string>
     <string name="sportrivia_sdk_enter_player">Enter player name</string>
@@ -17,4 +20,9 @@
     <string name="sportrivia_sdk_done">Done</string>
     <string name="sportrivia_sdk_answers_title">Trivia Answers</string>
     <string name="sportrivia_sdk_back">Back</string>
+    <string name="sportrivia_sdk_exit_game">Exit game</string>
+    <string name="sportrivia_sdk_exit_title">Leave the game?</string>
+    <string name="sportrivia_sdk_exit_message">Your progress won\'t be saved.</string>
+    <string name="sportrivia_sdk_exit_confirm">Leave</string>
+    <string name="sportrivia_sdk_exit_stay">Keep Playing</string>
 </resources>

@@ -1,15 +1,21 @@
 package com.sportrivia.sdk.internal.logic;
 
 import com.sportrivia.sdk.internal.data.TeamAbbreviations;
+import com.sportrivia.sdk.internal.models.CollectFields;
+import com.sportrivia.sdk.internal.models.LocationResult;
 import com.sportrivia.sdk.internal.models.PlayerInfo;
+import com.sportrivia.sdk.internal.models.Sponsorship;
 import com.sportrivia.sdk.internal.services.JsonParser;
+import com.sportrivia.sdk.internal.services.LocationProvider;
 import com.sportrivia.sdk.internal.services.S3DataService;
 import com.sportrivia.sdk.public_api.Sport;
 import com.sportrivia.sdk.public_api.SporTriviaGameResult;
 import com.sportrivia.sdk.public_api.SporTriviaLogger;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -42,6 +48,17 @@ public class GameEngine {
     private String lastName = "";
     private String email = "";
     private String phoneNumber = "";
+    private boolean over18 = false;
+    private Map<String, String> customFieldAnswers = new HashMap<>();
+    private CollectFields collectFields = CollectFields.legacyDefault();
+    private Sponsorship sponsorship;
+    private String responsePath;
+
+    /**
+     * Best-effort device location for the results upload; injected by the
+     * UI layer. Null (e.g. in tests) uploads location_status "unavailable".
+     */
+    private LocationProvider locationProvider;
 
     public GameEngine(S3DataService s3Service) {
         this.s3Service = s3Service;
@@ -61,6 +78,14 @@ public class GameEngine {
             correctPlayerIds.add(normalizePlayerId(id));
         }
         customQuestion = (String) answerKey.get("question");
+        Object rawCollectFields = answerKey.get("collect_fields");
+        collectFields = rawCollectFields instanceof CollectFields
+                ? (CollectFields) rawCollectFields
+                : CollectFields.legacyDefault();
+        Object rawSponsorship = answerKey.get("sponsorship");
+        sponsorship = rawSponsorship instanceof Sponsorship ? (Sponsorship) rawSponsorship : null;
+        Object rawResponsePath = answerKey.get("response_path");
+        responsePath = rawResponsePath instanceof String ? ((String) rawResponsePath).trim() : null;
         SporTriviaLogger.info("Answer key loaded: " + correctPlayerIds.size() + " correct IDs");
 
         byte[] playerData = s3Service.downloadPlayerList(sport);
@@ -85,6 +110,14 @@ public class GameEngine {
 
     public byte[] downloadTeamImage() throws Exception {
         return s3Service.downloadTeamImage(sport, teamAbbr);
+    }
+
+    /** Download the sponsorship banner image, or null when the question has no sponsor. */
+    public byte[] downloadSponsorshipBanner() throws Exception {
+        if (sponsorship == null) {
+            return null;
+        }
+        return s3Service.download(sponsorship.assetKey);
     }
 
     public void startGame() {
@@ -131,15 +164,34 @@ public class GameEngine {
         return remainingCorrectPlayers.isEmpty();
     }
 
+    public void setLocationProvider(LocationProvider locationProvider) {
+        this.locationProvider = locationProvider;
+    }
+
     public void uploadResults() {
         try {
+            // Best-effort location: waits at most 8s (on this background
+            // thread) for a fix that started warming when the game opened;
+            // never fails the upload.
+            LocationResult location = locationProvider != null
+                    ? locationProvider.await(8000)
+                    : LocationResult.unavailable();
             byte[] data = JsonParser.formatGameResults(
-                firstName, lastName, email, phoneNumber,
-                gameId, correctUserPlayers
+                firstName, lastName, email, phoneNumber, over18, customFieldAnswers,
+                gameId, correctUserPlayers, location
             );
-            String[] parts = gameId.split("_");
-            String suffix = parts.length > 1 ? gameId.substring(parts[0].length() + 1) : "";
-            s3Service.uploadGameResults(sport, team1Name, suffix, data);
+            if (responsePath != null && !responsePath.isEmpty()) {
+                // Preferred: the portal embeds the exact upload destination in
+                // the answer key so results land where the portal export reads.
+                s3Service.uploadGameResults(responsePath, data);
+            } else {
+                // Legacy answer keys (no response_path): derive a path from the
+                // gameId. For partner accounts this folder may not match the
+                // portal export's location — republish the question to fix.
+                String[] parts = gameId.split("_");
+                String suffix = parts.length > 1 ? gameId.substring(parts[0].length() + 1) : "";
+                s3Service.uploadGameResults(sport, team1Name, suffix, data);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -152,16 +204,31 @@ public class GameEngine {
         }
         return new SporTriviaGameResult(
             gameId, sport, correct, incorrect, maxStreak,
-            firstName, lastName, email, phoneNumber, names
+            firstName, lastName, email, phoneNumber, over18, customFieldAnswers, names
         );
     }
 
     public void setUserInfo(String firstName, String lastName, String email, String phoneNumber) {
+        setUserInfo(firstName, lastName, email, phoneNumber, false, new HashMap<String, String>());
+    }
+
+    public void setUserInfo(String firstName, String lastName, String email, String phoneNumber,
+                            boolean over18, Map<String, String> customFieldAnswers) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
         this.phoneNumber = phoneNumber;
+        this.over18 = over18;
+        this.customFieldAnswers = customFieldAnswers == null
+                ? new LinkedHashMap<String, String>()
+                : new LinkedHashMap<>(customFieldAnswers);
     }
+
+    /** Data-capture configuration for this game (legacy default when the answer key has none). */
+    public CollectFields getCollectFields() { return collectFields; }
+
+    /** Per-question sponsorship, or null when the question has no sponsor. */
+    public Sponsorship getSponsorship() { return sponsorship; }
 
     public String getGameId() { return gameId; }
     public Sport getSport() { return sport; }

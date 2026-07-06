@@ -35,6 +35,11 @@ public class GameOverActivity extends AppCompatActivity {
         Button btnAnswers = findViewById(R.id.sportrivia_sdk_btn_answers);
         Button btnDone = findViewById(R.id.sportrivia_sdk_btn_done);
 
+        SponsorBanner.bind(this,
+                findViewById(R.id.sportrivia_sdk_go_sponsor_banner),
+                findViewById(R.id.sportrivia_sdk_go_text_sponsor),
+                engine);
+
         textStreak.setText("Streak: " + engine.getCurrentStreak());
         textCorrect.setText("Correct: " + engine.getCorrect());
         textIncorrect.setText("Incorrect: " + engine.getIncorrect());

@@ -10,6 +10,12 @@ import com.sportrivia.sdk.internal.ui.UserInfoActivity;
  */
 public final class SporTriviaSDK {
 
+    /**
+     * SDK release version, reported as {@code sdk_version} in game-result
+     * uploads. Canonical value lives in {@link SporTriviaVersion}.
+     */
+    public static final String SDK_VERSION = SporTriviaVersion.SDK_VERSION;
+
     private static SporTriviaConfiguration configuration;
     private static SporTriviaDelegate activeDelegate;
 
