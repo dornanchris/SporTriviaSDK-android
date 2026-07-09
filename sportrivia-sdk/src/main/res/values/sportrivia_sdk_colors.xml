@@ -1,11 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="sportrivia_sdk_background">#1A1A33</color>
-    <color name="sportrivia_sdk_primary">#2196F3</color>
-    <color name="sportrivia_sdk_correct">#4CAF50</color>
-    <color name="sportrivia_sdk_incorrect">#F44336</color>
-    <color name="sportrivia_sdk_text">#FFFFFF</color>
-    <color name="sportrivia_sdk_input_bg">#F5F5F5</color>
-    <color name="sportrivia_sdk_input_text">#1A1A1A</color>
-    <color name="sportrivia_sdk_input_hint">#757575</color>
+    <!-- SporTrivia design system defaults (navy/teal). Partners can still
+         override at runtime via SporTriviaTheme. -->
+    <color name="sportrivia_sdk_background">#07111F</color>
+    <color name="sportrivia_sdk_primary">#14B8A6</color>
+    <color name="sportrivia_sdk_correct">#A7F3D0</color>
+    <color name="sportrivia_sdk_incorrect">#FCA5A5</color>
+    <color name="sportrivia_sdk_text">#F8FAFC</color>
+    <color name="sportrivia_sdk_input_bg">#0F172A</color>
+    <color name="sportrivia_sdk_input_text">#F8FAFC</color>
+    <color name="sportrivia_sdk_input_hint">#8FB3D9</color>
+    <color name="sportrivia_sdk_surface">#0F2038</color>
+    <color name="sportrivia_sdk_card_border">#3A94A3B8</color>
 </resources>
