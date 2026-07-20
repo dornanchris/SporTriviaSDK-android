@@ -135,9 +135,39 @@ public class TeamAbbreviations {
         m.put("50 Goal Season", "50Gseason");
         m.put("30 Goal Season", "30Gseason");
         m.put("300 Career Wins", "300careerW");
-        m.put("Bridgeport Islanders", "BPI"); m.put("Hershey Bears", "HSB");
-        m.put("Toronto Marlies", "TOM"); m.put("Providence Bruins", "PRV");
-        m.put("Toledo Walleye", "TOW"); m.put("Florida Everblades", "FLE");
+        // AHL (mirrors the iOS SDK hockey table so minor-league custom games
+        // show full team names instead of the raw abbreviation).
+        m.put("Abbotsford Canucks", "ABC"); m.put("Bakersfield Condors", "BKC");
+        m.put("Belleville Senators", "BVS"); m.put("Bridgeport Islanders", "BPI");
+        m.put("Calgary Wranglers", "CGW"); m.put("Charlotte Checkers", "CHC");
+        m.put("Chicago Wolves", "CHW"); m.put("Cleveland Monsters", "CLM");
+        m.put("Coachella Valley Firebirds", "CVF"); m.put("Colorado Eagles", "COE");
+        m.put("Grand Rapids Griffins", "GFG"); m.put("Hartford Wolf Pack", "WFP");
+        m.put("Henderson Silver Knights", "HSK"); m.put("Hershey Bears", "HSB");
+        m.put("Iowa Wild", "IOW"); m.put("Laval Rocket", "LVR");
+        m.put("Lehigh Valley Phantoms", "LVP"); m.put("Manitoba Moose", "MNT");
+        m.put("Milwaukee Admirals", "MWA"); m.put("Ontario Reign", "OTR");
+        m.put("Providence Bruins", "PRV"); m.put("Rochester Americans", "ROD");
+        m.put("Rockford IceHogs", "RIH"); m.put("San Diego Gulls", "SDG");
+        m.put("San Jose Barracuda", "SJB"); m.put("Scranton Penguins", "WBS");
+        m.put("Springfield Thunderbirds", "STF"); m.put("Syracuse Crunch", "SYC");
+        m.put("Texas Stars", "TXS"); m.put("Toronto Marlies", "TOM");
+        m.put("Tucson Roadrunners", "TRR"); m.put("Utica Comets", "UTC");
+        // ECHL
+        m.put("Adirondack Thunder", "ARD"); m.put("Allen Americans", "ALA");
+        m.put("Atlanta Gladiators", "ATG"); m.put("Cincinnati Cyclones", "CIC");
+        m.put("Florida Everblades", "FLE"); m.put("Fort Wayne Komets", "FWK");
+        m.put("Greenville Swamp Rabbits", "GSR"); m.put("Idaho Steelheads", "IDS");
+        m.put("Indy Fuel", "IDF"); m.put("Iowa Heartlanders", "IHL");
+        m.put("Jacksonville Icemen", "JAX"); m.put("Kalamazoo Wings", "KAL");
+        m.put("Kansas City Mavericks", "KCM"); m.put("Maine Mariners", "MEM");
+        m.put("Norfolk Admirals", "NFA"); m.put("Orlando Solar Bears", "OSB");
+        m.put("Rapid City Rush", "RCR"); m.put("Reading Royals", "RDR");
+        m.put("Savannah Ghost Pirates", "SGP"); m.put("South Carolina Stingrays", "SCS");
+        m.put("Toledo Walleye", "TOW"); m.put("Trois-Rivi\u00e8res Lions", "TRL");
+        m.put("Tulsa Oilers", "TUL"); m.put("Utah Grizzlies", "UTH");
+        m.put("Wheeling Nailers", "WHN"); m.put("Wichita Thunder", "WIC");
+        m.put("Worcester Raiders", "WOR");
         return m;
     }
 }

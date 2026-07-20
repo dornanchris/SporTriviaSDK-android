@@ -61,6 +61,28 @@ public class SporTriviaDeepLinkTest {
     }
 
     @Test
+    public void testParseMinorLeagueHockeyLinks() {
+        SporTriviaDeepLink ahl = SporTriviaDeepLink.parse("partnerapp://sportrivia/custom/HSB_WBS?info=ahl");
+        assertNotNull(ahl);
+        assertEquals("HSB_WBS", ahl.getGameId());
+        assertEquals(Sport.AHL, ahl.getSport());
+
+        SporTriviaDeepLink echl = SporTriviaDeepLink.parse("sportrivia://custom/FLE_TOW?info=echl");
+        assertNotNull(echl);
+        assertEquals("FLE_TOW", echl.getGameId());
+        assertEquals(Sport.ECHL, echl.getSport());
+    }
+
+    @Test
+    public void testMinorLeagueSportCodesMatchS3Folders() {
+        // The suggestion list is fetched from
+        // answer_keys/<code>/all_<code>_players.json, so a minor-league custom
+        // game must resolve to the ahl/echl folders — not nhl.
+        assertEquals("ahl", Sport.AHL.getCode());
+        assertEquals("echl", Sport.ECHL.getCode());
+    }
+
+    @Test
     public void testParseRejectsUnknownSport() {
         assertNull(SporTriviaDeepLink.parse("partnerapp://sportrivia/custom/NYI_Top5A?info=cricket"));
     }
